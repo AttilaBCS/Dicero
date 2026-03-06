@@ -1,4 +1,227 @@
 // ============================================================
+// SOUND EFFECTS SYSTEM (Web Audio API)
+// ============================================================
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio(){
+  if(!audioCtx) audioCtx = new AudioCtx();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function playSound(type){
+  initAudio();
+  if(!audioCtx) return;
+
+  const now = audioCtx.currentTime;
+
+  if(type === 'roll'){
+    // Dice rolling - quick percussive taps like dice hitting table
+    for(let i = 0; i < 6; i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'triangle';
+      // Vary pitch for each tap
+      osc.frequency.value = 150 + Math.random() * 100;
+      const t = now + i * 0.06 + Math.random() * 0.03;
+      const vol = 0.12 * (1 - i * 0.1);
+      gain.gain.setValueAtTime(vol, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+      osc.start(t);
+      osc.stop(t + 0.06);
+    }
+  }
+  else if(type === 'keep'){
+    // Dice keep - soft click
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 600;
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    osc.start(now);
+    osc.stop(now + 0.1);
+  }
+  else if(type === 'unkeep'){
+    // Dice unkeep - lower pitch
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 400;
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    osc.start(now);
+    osc.stop(now + 0.08);
+  }
+  else if(type === 'score'){
+    // Score - coins dropping/collecting sound
+    for(let i = 0; i < 5; i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = 1800 + i * 200 + Math.random() * 200;
+      const t = now + i * 0.06;
+      gain.gain.setValueAtTime(0.07, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+      osc.start(t);
+      osc.stop(t + 0.12);
+    }
+  }
+  else if(type === 'chip'){
+    // Chip add - simple coin ding
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1400, now);
+    osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  }
+  else if(type === 'mult'){
+    // Mult add - cash register cha-ching
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc1.type = 'sine';
+    osc2.type = 'triangle';
+    osc1.frequency.value = 1800;
+    osc2.frequency.value = 2200;
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 0.15);
+    osc2.stop(now + 0.15);
+    // Second ring
+    const osc3 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    osc3.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc3.type = 'sine';
+    osc3.frequency.value = 2600;
+    gain2.gain.setValueAtTime(0.06, now + 0.08);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    osc3.start(now + 0.08);
+    osc3.stop(now + 0.22);
+  }
+  else if(type === 'victory'){
+    // Victory fanfare
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.12, now + i * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.3);
+      osc.start(now + i * 0.12);
+      osc.stop(now + i * 0.12 + 0.3);
+    });
+  }
+  else if(type === 'defeat'){
+    // Defeat - descending
+    [400, 350, 300, 200].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.08, now + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.2);
+      osc.start(now + i * 0.15);
+      osc.stop(now + i * 0.15 + 0.2);
+    });
+  }
+  else if(type === 'buy'){
+    // Purchase sound - coin
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
+    gain.gain.setValueAtTime(0.1, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  }
+  else if(type === 'charm'){
+    // Charm pickup - magical shimmer
+    [880, 1100, 1320, 1100, 880].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.06, now + i * 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.1);
+      osc.start(now + i * 0.05);
+      osc.stop(now + i * 0.05 + 0.1);
+    });
+  }
+  else if(type === 'click'){
+    // UI click
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = 500;
+    gain.gain.setValueAtTime(0.06, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+    osc.start(now);
+    osc.stop(now + 0.04);
+  }
+  else if(type === 'bigScore'){
+    // Big score - jackpot coin shower
+    for(let i = 0; i < 12; i++){
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = 2000 + Math.random() * 1500;
+      const t = now + i * 0.04 + Math.random() * 0.02;
+      gain.gain.setValueAtTime(0.08, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      osc.start(t);
+      osc.stop(t + 0.14);
+    }
+    // Add a rising shimmer
+    const shimmer = audioCtx.createOscillator();
+    const shimmerGain = audioCtx.createGain();
+    shimmer.connect(shimmerGain);
+    shimmerGain.connect(audioCtx.destination);
+    shimmer.type = 'sine';
+    shimmer.frequency.setValueAtTime(1500, now);
+    shimmer.frequency.exponentialRampToValueAtTime(3500, now + 0.5);
+    shimmerGain.gain.setValueAtTime(0.05, now);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    shimmer.start(now);
+    shimmer.stop(now + 0.5);
+  }
+}
+
+// ============================================================
 // ANIMATED BACKGROUND (Balatro-style swirling pattern)
 // ============================================================
 const bgCanvas = document.getElementById('bg-canvas');
@@ -128,13 +351,13 @@ const CATEGORIES = [
   {id:'fours',name:'Fours',desc:'All dice showing 4',baseChips:20,baseMult:3,chipPer:8,multPer:2,num:4},
   {id:'fives',name:'Fives',desc:'All dice showing 5',baseChips:20,baseMult:3,chipPer:8,multPer:2,num:5},
   {id:'sixes',name:'Sixes',desc:'All dice showing 6',baseChips:25,baseMult:3,chipPer:8,multPer:2,num:6},
-  {id:'three_kind',name:'Three of a Kind',desc:'3+ same value',baseChips:30,baseMult:3,chipPer:10,multPer:1},
-  {id:'four_kind',name:'Four of a Kind',desc:'4+ same value',baseChips:60,baseMult:5,chipPer:15,multPer:2},
-  {id:'full_house',name:'Full House',desc:'3 of one + 2 of another',baseChips:40,baseMult:4,chipPer:15,multPer:2},
-  {id:'small_straight',name:'Small Straight',desc:'4 sequential',baseChips:45,baseMult:4,chipPer:15,multPer:2},
-  {id:'large_straight',name:'Large Straight',desc:'5 sequential',baseChips:80,baseMult:7,chipPer:20,multPer:3},
-  {id:'yahtzee',name:'Yahtzee',desc:'All 5 same',baseChips:100,baseMult:10,chipPer:25,multPer:4},
-  {id:'chance',name:'Chance',desc:'Any combo, sum all',baseChips:15,baseMult:2,chipPer:10,multPer:1},
+  {id:'three_kind',name:'Three of a Kind',desc:'3+ same value',baseChips:35,baseMult:3,chipPer:12,multPer:1},
+  {id:'four_kind',name:'Four of a Kind',desc:'4+ same value',baseChips:65,baseMult:5,chipPer:15,multPer:2},
+  {id:'full_house',name:'Full House',desc:'3 of one + 2 of another',baseChips:45,baseMult:4,chipPer:15,multPer:2},
+  {id:'small_straight',name:'Small Straight',desc:'4 sequential',baseChips:50,baseMult:4,chipPer:15,multPer:2},
+  {id:'large_straight',name:'Large Straight',desc:'5 sequential',baseChips:85,baseMult:7,chipPer:20,multPer:3},
+  {id:'yahtzee',name:'Dicero',desc:'All 5 same',baseChips:100,baseMult:12,chipPer:25,multPer:4},
+  {id:'chance',name:'Chance',desc:'Any combo, sum all',baseChips:12,baseMult:2,chipPer:8,multPer:1},
 ];
 
 const TRIALS = [
@@ -144,7 +367,7 @@ const TRIALS = [
      {name:'Ember Golem',effect:'ember_golem',desc:'Ones count as 0 chips (still count for combos).'},
      {name:'Flame Keeper',effect:'flame_keeper',desc:'Target +50 for each hand used.'},
    ],
-   boss:{name:'Pyraxxus, the Undying Flame',effect:'pyraxxus',desc:'A random number is debuffed \u2014 those dice give 0 chips and skip Charm effects.'}
+   boss:{name:'Pyraxxus, the Undying Flame',effect:'pyraxxus',desc:'Sixes are debuffed \u2014 those dice give 0 chips and skip Charm effects.'}
   },
   {name:'The Hollow Depths',desc:'Fungal caverns and flooded crypts.',base:1500,bossTarget:4500,
    enemies:[
@@ -154,7 +377,7 @@ const TRIALS = [
    ],
    boss:{name:'Gloomjaw, the Depth Devourer',effect:'gloomjaw',desc:'After each hand, your lowest-scoring used category is devoured (disabled).'}
   },
-  {name:'The Shattered Spire',desc:'Wind and lightning rage through fractured halls.',base:8000,bossTarget:24000,
+  {name:'The Shattered Spire',desc:'Wind and lightning rage through fractured halls.',base:6000,bossTarget:20000,
    enemies:[
      {name:'Storm Elemental',effect:'storm_elemental',desc:'Even-numbered dice give half chips.'},
      {name:'Skyborne Sentinel',effect:'skyborne_sentinel',desc:'Must score with 3+ dice or hand scores 0.'},
@@ -162,7 +385,7 @@ const TRIALS = [
    ],
    boss:{name:'Voltaryx, the Spire\'s Crown',effect:'voltaryx',desc:'Can\'t score the same category twice in a row.'}
   },
-  {name:'The Obsidian Rift',desc:'Dark glass and void energy twist the laws of chance.',base:40000,bossTarget:120000,
+  {name:'The Obsidian Rift',desc:'Dark glass and void energy twist the laws of chance.',base:30000,bossTarget:100000,
    enemies:[
      {name:'Void Flickerer',effect:'void_flickerer',desc:'One die is phased \u2014 random value each reroll, can\'t be kept.'},
      {name:'Glass Stalker',effect:'glass_stalker',desc:'Three of a Kind or lower: 10% of score is subtracted.'},
@@ -170,7 +393,7 @@ const TRIALS = [
    ],
    boss:{name:'Nihilex, the Rift Warden',effect:'nihilex',desc:'Two random numbers can\'t be scored (0 chips, don\'t count for combos).'}
   },
-  {name:'The Astral Throne',desc:'Beyond the mortal plane.',base:200000,bossTarget:600000,
+  {name:'The Astral Throne',desc:'Beyond the mortal plane.',base:150000,bossTarget:500000,
    enemies:[
      {name:'Stellar Wisp',effect:'stellar_wisp',desc:'Rerolls cost $1 each.'},
      {name:'Constellation Beast',effect:'constellation_beast',desc:'Only full-5-dice categories get full mult; others half.'},
@@ -245,7 +468,7 @@ const CHARMS = [
   // --- MORE MATCHING/YAHTZEE ARCHETYPE ---
   {id:'pair_bond',name:'Pair Bond',icon:'💑',rarity:'common',desc:'+12 chips per pair in your dice.',type:'on_score',cost:4},
   {id:'mob_mentality',name:'Mob Mentality',icon:'👥',rarity:'uncommon',desc:'+3 mult per die showing the most common value.',type:'on_score',cost:8},
-  {id:'perfectionist',name:'Perfectionist',icon:'💯',rarity:'rare',desc:'Yahtzee: ×3 mult.',type:'on_score',cost:15},
+  {id:'perfectionist',name:'Perfectionist',icon:'💯',rarity:'rare',desc:'Dicero: ×3 mult.',type:'on_score',cost:15},
   {id:'domino_effect',name:'Domino Effect',icon:'🀄',rarity:'uncommon',desc:'Four of a Kind: retrigger all matching dice.',type:'on_score',cost:9},
   {id:'herd_instinct',name:'Herd Instinct',icon:'🐑',rarity:'common',desc:'+1 mult permanently per Three of a Kind scored.',type:'scaling',scaleStat:'mult',scaleAmt:1,accumulated:0,cost:5},
 
@@ -281,6 +504,29 @@ const CHARMS = [
   {id:'piggy_bank',name:'Piggy Bank',icon:'🐷',rarity:'common',desc:'+$1 per encounter. Sell for accumulated gold.',type:'scaling',scaleStat:'gold',scaleAmt:1,accumulated:0,cost:3},
   {id:'merchant',name:'Merchant',icon:'🏪',rarity:'uncommon',desc:'Shop items cost $1 less (min $1).',type:'economy',cost:6},
   {id:'bounty_hunter',name:'Bounty Hunter',icon:'🎯',rarity:'uncommon',desc:'+$3 for winning on your last hand.',type:'economy',cost:7},
+
+  // --- CROSS-ARCHETYPE & UTILITY ---
+  {id:'mirror_match',name:'Mirror Match',icon:'🪞',rarity:'uncommon',desc:'If all 5 dice are the same parity (all odd or all even): +6 mult.',type:'on_score',cost:8},
+  {id:'underdog',name:'Underdog',icon:'🐕',rarity:'common',desc:'+4 mult when your score is below 50% of the target.',type:'on_score',cost:4},
+  {id:'last_stand',name:'Last Stand',icon:'🛡️',rarity:'rare',desc:'On your final hand: +10 mult, +30 chips.',type:'on_score',cost:13},
+  {id:'recycler',name:'Recycler',icon:'♻️',rarity:'common',desc:'+1 mult permanently each time you use all 3 rerolls in a hand.',type:'scaling',scaleStat:'mult',scaleAmt:1,accumulated:0,cost:5},
+  {id:'dice_whisperer',name:'Dice Whisperer',icon:'👂',rarity:'uncommon',desc:'+2 mult per unkept die when scoring (reward for scoring with fewer dice).',type:'on_score',cost:7},
+  {id:'lucky_clover',name:'Lucky Clover',icon:'☘️',rarity:'common',desc:'20% chance: +15 chips after each hand.',type:'on_score',cost:4},
+  {id:'overkill',name:'Overkill',icon:'💥',rarity:'rare',desc:'If you beat the target by 2x or more in a single hand: +$5.',type:'economy',cost:12},
+  {id:'minimalist',name:'Minimalist',icon:'✂️',rarity:'uncommon',desc:'+3 mult per empty charm slot.',type:'independent',cost:6},
+
+  // --- REROLL-FOCUSED ARCHETYPE ---
+  {id:'chaos_rider',name:'Chaos Rider',icon:'🌪️',rarity:'uncommon',desc:'+5 chips per reroll used this hand.',type:'on_score',cost:7},
+  {id:'turbulence',name:'Turbulence',icon:'🌊',rarity:'rare',desc:'If you used all rerolls: ×1.5 mult.',type:'on_score',cost:13},
+  {id:'reroll_addict',name:'Reroll Addict',icon:'🎡',rarity:'common',desc:'+1 reroll per encounter.',type:'passive',cost:6},
+
+  // --- DEFENSIVE / SURVIVAL ---
+  {id:'second_wind',name:'Second Wind',icon:'💨',rarity:'rare',desc:'Once per encounter: if a hand scores 0, gain +1 hand back.',type:'passive',usedThisEncounter:false,cost:14},
+  {id:'iron_will',name:'Iron Will',icon:'⚔️',rarity:'uncommon',desc:'+2 mult per hand already used this encounter.',type:'on_score',cost:8},
+
+  // --- MORE LEGENDARIES ---
+  {id:'alchemist',name:'The Alchemist',icon:'⚗️',rarity:'legendary',desc:'Chips and Mult are swapped before multiplying.',type:'on_score',cost:20},
+  {id:'golden_ratio',name:'Golden Ratio',icon:'🌀',rarity:'legendary',desc:'If dice show exactly 1-2-3-4-5: ×5 mult.',type:'on_score',cost:18},
 ];
 
 const ENCHANTMENTS = [
@@ -325,7 +571,7 @@ let G = null;
 
 function newRun(){
   G = {
-    gold:4,trial:0,encounter:0,
+    gold:5,trial:0,encounter:0,
     hands:4,maxHands:4,
     rerolls:3,maxRerolls:3,
     dice:[0,0,0,0,0],kept:[false,false,false,false,false],
@@ -460,7 +706,7 @@ function scoreHand(categoryId){
   const enemy=getEnemy();const noCharms=enemy.effect==='ash_wraith'&&G.rerollCount<=1;const nullP=enemy.effect==='null_prophet';
   G.charms.forEach((ch,ci)=>{
     if(G.disabledCharms.includes(ci))return;
-    if(ch.type==='independent'){if(ch.chips)chips+=ch.chips;if(ch.mult){let m=ch.mult;if(nullP)m=Math.floor(m/2);mult+=m}if(ch.chips||ch.mult)log.push(`${ch.name}: +${ch.chips||0} chips, +${ch.mult||0} mult`)}
+    if(ch.type==='independent'){if(ch.id==='minimalist'){const empty=G.maxCharmSlots-G.charms.length;if(empty>0){mult+=empty*3;log.push(`Minimalist: +${empty*3} mult (${empty} empty slots)`)}}else{if(ch.chips)chips+=ch.chips;if(ch.mult){let m=ch.mult;if(nullP)m=Math.floor(m/2);mult+=m}if(ch.chips||ch.mult)log.push(`${ch.name}: +${ch.chips||0} chips, +${ch.mult||0} mult`)}}
     if(ch.type==='on_category'&&ch.category===categoryId&&!noCharms){chips+=ch.chips||0;if(ch.catMult)mult+=ch.catMult;log.push(`${ch.name}: +${ch.chips||0} chips${ch.catMult?', +'+ch.catMult+' mult':''}`)}
     if(ch.type==='on_score'){
       if(ch.id==='warm_ember')si.forEach(i=>{if(G.dice[i]===1){chips+=5;log.push('Warm Ember: +5 chips (die 1)')}});
@@ -486,7 +732,7 @@ function scoreHand(categoryId){
       // More matching/yahtzee
       if(ch.id==='pair_bond'){const cc={};G.dice.forEach(d=>cc[d]=(cc[d]||0)+1);let pairs=0;Object.values(cc).forEach(v=>{if(v>=2)pairs+=Math.floor(v/2)});if(pairs>0){chips+=pairs*12;log.push(`Pair Bond: +${pairs*12} chips (${pairs} pair${pairs>1?'s':''})`)}}
       if(ch.id==='mob_mentality'){const cc={};G.dice.forEach(d=>cc[d]=(cc[d]||0)+1);const mx=Math.max(...Object.values(cc),0);if(mx>=2){mult+=mx*3;log.push(`Mob Mentality: +${mx*3} mult (${mx} of a kind)`)}}
-      if(ch.id==='perfectionist'&&categoryId==='yahtzee'){mult*=3;log.push('Perfectionist: ×3 mult (Yahtzee!)')}
+      if(ch.id==='perfectionist'&&categoryId==='yahtzee'){mult*=3;log.push('Perfectionist: ×3 mult (Dicero!)')}
       if(ch.id==='domino_effect'&&categoryId==='four_kind'){const cc={};G.dice.forEach(d=>cc[d]=(cc[d]||0)+1);let ec=0;for(const[v,c]of Object.entries(cc)){if(c>=4)ec+=Number(v)*4}if(ec>0){chips+=ec;log.push(`Domino Effect: +${ec} chips (retrigger 4)`)}}
       // Straight support
       if(ch.id==='compass'&&['small_straight','large_straight'].includes(categoryId)){chips+=20;log.push('Compass: +20 chips (straight)')}
@@ -505,6 +751,17 @@ function scoreHand(categoryId){
       if(ch.id==='all_in'&&G.hands<=2){mult*=3;log.push('All In: ×3 mult!')}
       if(ch.id==='lucky_seven'){const s=G.dice.reduce((a,b)=>a+b,0);if(s===7){chips+=50;log.push('Lucky Seven: +50 chips (sum=7)')}}
       if(ch.id==='double_or_nothing'){if(Math.random()<0.5){mult*=2;log.push('Double or Nothing: ×2 mult!')}else{mult=Math.max(1,Math.floor(mult/2));log.push('Double or Nothing: ÷2 mult...')}}
+      // New utility/cross-archetype charms
+      if(ch.id==='mirror_match'){const parities=si.map(i=>G.dice[i]%2);if(si.length===5&&parities.every(p=>p===parities[0])){mult+=6;log.push(`Mirror Match: +6 mult (all ${parities[0]===0?'even':'odd'})`)}}
+      if(ch.id==='underdog'&&G.cumulativeScore<G.targetScore*0.5){mult+=4;log.push('Underdog: +4 mult (below 50%)')}
+      if(ch.id==='last_stand'&&G.hands<=1){chips+=30;mult+=10;log.push('Last Stand: +30 chips, +10 mult (final hand!)')}
+      if(ch.id==='dice_whisperer'){const unkept=5-si.length;if(unkept>0){mult+=unkept*2;log.push(`Dice Whisperer: +${unkept*2} mult (${unkept} unkept)`)}}
+      if(ch.id==='lucky_clover'&&Math.random()<0.2){chips+=15;log.push('Lucky Clover: +15 chips (lucky!)')}
+      if(ch.id==='chaos_rider'&&G.rerollCount>0){chips+=G.rerollCount*5;log.push(`Chaos Rider: +${G.rerollCount*5} chips (${G.rerollCount} rerolls)`)}
+      if(ch.id==='turbulence'&&G.rerollCount>=G.maxRerolls){mult=Math.ceil(mult*1.5);log.push('Turbulence: ×1.5 mult (all rerolls used)')}
+      if(ch.id==='iron_will'&&G.handsUsed>0){mult+=G.handsUsed*2;log.push(`Iron Will: +${G.handsUsed*2} mult (${G.handsUsed} hands used)`)}
+      if(ch.id==='alchemist'){const tmp=chips;chips=mult;mult=tmp;log.push(`The Alchemist: swapped! ${chips} chips × ${mult} mult`)}
+      if(ch.id==='golden_ratio'){const sorted=[...G.dice].sort();if(sorted.join('')==='12345'){mult*=5;log.push('Golden Ratio: ×5 mult (1-2-3-4-5!)')}}
     }
     if(ch.type==='on_reroll'&&ch.id==='gamblers_grin'&&G.rerollCount>0){mult+=G.rerollCount;log.push(`Gambler's Grin: +${G.rerollCount} mult`)}
     if(ch.type==='scaling'){
@@ -517,6 +774,7 @@ function scoreHand(categoryId){
       if(ch.id==='treasure_hunter'&&ch.accumulated){chips+=ch.accumulated;log.push(`Treasure Hunter: +${ch.accumulated} chips`)}
       if(ch.id==='herd_instinct'&&ch.accumulated){mult+=ch.accumulated;log.push(`Herd Instinct: +${ch.accumulated} mult`)}
       if(ch.id==='wanderlust'&&ch.accumulated){mult+=ch.accumulated;log.push(`Wanderlust: +${ch.accumulated} mult`)}
+      if(ch.id==='recycler'&&ch.accumulated){mult+=ch.accumulated;log.push(`Recycler: +${ch.accumulated} mult`)}
     }
     if(ch.id==='golden_bones'&&G.gold>=20){mult=Math.ceil(mult*1.5);log.push(`Golden Bones: \u00d71.5 mult`)}
     if(ch.id==='gamblers_ruin'){mult*=2;log.push("Gambler's Ruin: \u00d72 mult")}
@@ -559,6 +817,7 @@ function renderDice(){
   for(let i=0;i<5;i++){
     const div=document.createElement('div');
     let cls='die';
+    if(!G.hasRolled)cls+=' unrolled';
     if(G.kept[i])cls+=' kept';
     if(G.mods[i])cls+=` mod-${G.mods[i]}`;
     if(G.hidden[i])cls+=' die-hidden';
@@ -575,6 +834,7 @@ function renderDice(){
   }
 }
 
+let _dragCharmIdx=null;
 function renderCharms(){
   const c=document.getElementById('charm-slots');c.innerHTML='';
   for(let i=0;i<G.maxCharmSlots;i++){
@@ -582,10 +842,20 @@ function renderCharms(){
       const ch=G.charms[i];const dis=G.disabledCharms.includes(i);
       const d=document.createElement('div');d.className='charm-slot';
       d.style.opacity=dis?'0.3':'1';
+      d.draggable=true;d.dataset.idx=i;
       d.innerHTML=`<div class="charm-header"><span class="charm-icon">${ch.icon||'?'}</span><div><div class="charm-name">${ch.name}</div><span class="charm-rarity rarity-${ch.rarity}">${ch.rarity}</span></div></div><div class="charm-desc">${ch.desc}</div>`;
+      d.addEventListener('dragstart',e=>{_dragCharmIdx=i;d.classList.add('dragging');e.dataTransfer.effectAllowed='move'});
+      d.addEventListener('dragend',()=>{_dragCharmIdx=null;d.classList.remove('dragging');document.querySelectorAll('.charm-slot,.empty-charm').forEach(el=>el.classList.remove('drag-over'))});
+      d.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';d.classList.add('drag-over')});
+      d.addEventListener('dragleave',()=>d.classList.remove('drag-over'));
+      d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('drag-over');if(_dragCharmIdx!==null&&_dragCharmIdx!==i){const moved=G.charms.splice(_dragCharmIdx,1)[0];G.charms.splice(i>_dragCharmIdx?i-1:i,0,moved);_dragCharmIdx=null;render()}});
       c.appendChild(d);
     } else {
-      const d=document.createElement('div');d.className='empty-charm';d.textContent='Empty';c.appendChild(d);
+      const d=document.createElement('div');d.className='empty-charm';d.textContent='Empty';
+      d.addEventListener('dragover',e=>{e.preventDefault();d.classList.add('drag-over')});
+      d.addEventListener('dragleave',()=>d.classList.remove('drag-over'));
+      d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('drag-over');if(_dragCharmIdx!==null){const moved=G.charms.splice(_dragCharmIdx,1)[0];G.charms.push(moved);_dragCharmIdx=null;render()}});
+      c.appendChild(d);
     }
   }
 }
@@ -689,6 +959,7 @@ function toggleKeep(i){
   const e=getEnemy();
   if(e.effect==='molten_sentinel'&&G.dice[i]===6)return;
   if(e.effect==='void_flickerer'&&i===G.phased)return;
+  playSound(G.kept[i]?'unkeep':'keep');
   G.kept[i]=!G.kept[i];render();
 }
 
@@ -700,16 +971,25 @@ function doRoll(){
     G.rerolls--;G.rerollCount++;if(!G.firstRerollDone)G.firstRerollDone=true;
     if(G.kept.every(k=>!k))G.charms.forEach(ch=>{if(ch.id==='fortunes_wheel')ch.accumulated=(ch.accumulated||0)+3});
   }
+  playSound('roll');
   G.animating=true;
+  // Capture kept state at roll time to prevent race conditions
+  const keptSnapshot = [...G.kept];
   const els=document.querySelectorAll('.die');
-  for(let i=0;i<5;i++)if(!G.kept[i])els[i]?.classList.add('rolling');
-  setTimeout(()=>{rollAllDice();G.hasRolled=true;G.animating=false;render()},500);
+  for(let i=0;i<5;i++)if(!keptSnapshot[i])els[i]?.classList.add('rolling');
+  setTimeout(()=>{
+    // Use the snapshot for rolling, not current G.kept
+    for(let i=0;i<5;i++)if(!keptSnapshot[i])G.dice[i]=rollDie(i);
+    handlePostRoll();
+    G.hasRolled=true;G.animating=false;render();
+  },500);
 }
 
 // Discards removed
 
 async function doScore(categoryId){
   if(G.animating)return;G.animating=true;
+  playSound('score');
   const result=scoreHand(categoryId);
   const chipsEl=document.getElementById('score-chips'),multEl=document.getElementById('score-mult'),
     resultEl=document.getElementById('score-result'),xEl=document.querySelector('.score-x'),
@@ -723,10 +1003,13 @@ async function doScore(categoryId){
     logEl.appendChild(entry);logEl.scrollTop=logEl.scrollHeight;
   }
   await sleep(250);
+  playSound('chip');
   chipsEl.textContent=fmt(result.chips);chipsEl.style.animation='chipAdd 0.4s ease-out';
   await sleep(350);
+  playSound('mult');
   xEl.textContent='\u00d7';multEl.textContent=fmt(result.mult);multEl.style.animation='multAdd 0.4s ease-out';
   await sleep(400);
+  if(result.total>500)playSound('bigScore');
   eqEl.textContent='=';resultEl.textContent=fmt(result.total);resultEl.style.animation='scorePop 0.7s ease-out';
   if(result.total>500)screenShake();
   await sleep(700);
@@ -742,6 +1025,10 @@ async function doScore(categoryId){
   G.charms.forEach(ch=>{if(ch.id==='wanderlust'&&['small_straight','large_straight'].includes(categoryId))ch.accumulated=(ch.accumulated||0)+2});
   // Momentum tracking
   G.charms.forEach(ch=>{if(ch.id==='momentum'){if(result.total>=200)ch._streak=(ch._streak||0)+1;else ch._streak=0}});
+  G.charms.forEach(ch=>{if(ch.id==='recycler'&&G.rerollCount>=G.maxRerolls)ch.accumulated=(ch.accumulated||0)+1});
+  G.charms.forEach(ch=>{if(ch.id==='overkill'&&result.total>=G.targetScore*2)G.gold+=5});
+  // Second Wind: if hand scored 0, get a hand back
+  G.charms.forEach(ch=>{if(ch.id==='second_wind'&&!ch.usedThisEncounter&&result.total===0){G.hands++;ch.usedThisEncounter=true}});
   // All In hand penalty
   G.charms.forEach(ch=>{if(ch.id==='all_in'&&G.hands>0){}});
   for(let i=0;i<5;i++)if(G.mods[i]==='cursed'&&G.dice[i]===1)G.hands=Math.max(0,G.hands-1);
@@ -788,13 +1075,15 @@ function startEncounter(){
   G.disabledCategories=[];G.disabledCharms=[];
   G.turnBonusChips=0;G.turnBonusMult=0;
   G.kept=[false,false,false,false,false];G.hidden=[false,false,false,false,false];
-  G.phased=-1;G.flameKeeperBonus=0;G.shopRerollCost=1;
+  G.phased=-1;G.flameKeeperBonus=0;G.shopRerollCost=3;
   G.charms.forEach(ch=>{if(ch.id==='fate_bender')ch.usedThisEncounter=false});
   G.charms.forEach(ch=>{if(ch.id==='chrono_die')G.rerolls++});
+  G.charms.forEach(ch=>{if(ch.id==='reroll_addict')G.rerolls++});
+  G.charms.forEach(ch=>{if(ch.id==='second_wind')ch.usedThisEncounter=false});
   G.charms.forEach(ch=>{if(ch.id==='blood_pact')G.hands=Math.max(1,G.hands-1)});
   G.charms.forEach(ch=>{if(ch.id==='all_in')G.hands=Math.max(1,G.hands-1)});
   if(isBoss()){
-    if(e.effect==='pyraxxus')G.bossDebuffNum=rng(1,6);
+    if(e.effect==='pyraxxus')G.bossDebuffNum=6;
     if(e.effect==='nihilex')G.bossBannedNums=shuffle([1,2,3,4,5,6]).slice(0,2);
     if(e.effect==='aeonax'){G.bossBannedNums=shuffle([1,2,3,4,5,6]).slice(0,3);G.hands=Math.max(1,G.hands-1)}
   }
@@ -804,7 +1093,7 @@ function startEncounter(){
   if(e.effect==='obsidian_warden')G.hands=Math.max(1,G.hands-1);
   if(e.effect==='shardcaster'&&G.charms.length>0)G.disabledCharms.push(rng(0,G.charms.length-1));
   if(e.effect==='rune_breaker'){let ml=0,mc=null;Object.entries(G.catLevels).forEach(([id,l])=>{if(l>ml){ml=l;mc=id}});if(mc&&ml>0)G.catLevels[mc]--}
-  if(G.dicePolishNext){G.dice[rng(0,4)]=6;G.dicePolishNext=false}
+  if(G.dicePolishNext){const pi=rng(0,4);G.dice[pi]=6;G.kept[pi]=true;G.dicePolishNext=false}
   G.charms.forEach(ch=>{
     if(ch.id==='eternitys_gambit'){const c=prompt("Eternity's Gambit: Pick category (1-13):\n"+CATEGORIES.map((c,i)=>`${i+1}. ${c.name}`).join('\n'));const idx=parseInt(c)-1;if(idx>=0&&idx<CATEGORIES.length)ch.chosenCategory=CATEGORIES[idx].id}
   });
@@ -812,9 +1101,10 @@ function startEncounter(){
 }
 
 function encounterWon(){
+  playSound('victory');
   const breakdown=[];
-  let pay=isBoss()?5:3;
-  breakdown.push({label:isBoss()?'Boss bonus':'Win bonus',amount:isBoss()?5:3});
+  let pay=isBoss()?7:3;
+  breakdown.push({label:isBoss()?'Boss bonus':'Win bonus',amount:isBoss()?7:3});
   if(G.hands>0){breakdown.push({label:`Unused hands (${G.hands})`,amount:G.hands});pay+=G.hands}
   const interest=Math.min(5,Math.floor(G.gold/5));
   if(interest>0){breakdown.push({label:`Interest ($${G.gold}\u00f75)`,amount:interest});pay+=interest}
@@ -844,6 +1134,94 @@ function encounterLost(){
 // ============================================================
 function showOverlay(html){document.getElementById('overlay-content').innerHTML=html;document.getElementById('overlay').classList.add('active')}
 function closeOverlay(){document.getElementById('overlay').classList.remove('active')}
+
+function showBonuses(){
+  let html=`<div style="max-width:600px;margin:0 auto">
+    <h2 style="margin-bottom:16px">📊 Bonuses & Multipliers</h2>`;
+
+  // Category Levels Section
+  html+=`<h3 style="color:#e8d080;margin-top:16px;border-bottom:1px solid rgba(232,208,128,0.2);padding-bottom:6px">Category Levels</h3>`;
+  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:8px">`;
+  let hasLevels=false;
+  CATEGORIES.forEach(cat=>{
+    const lvl=G.catLevels[cat.id]||0;
+    if(lvl>0){
+      hasLevels=true;
+      const bonusChips=cat.chipPer*lvl;
+      const bonusMult=cat.multPer*lvl;
+      html+=`<div style="background:rgba(25,20,45,0.9);border:1px solid rgba(232,208,128,0.25);border-radius:8px;padding:10px">
+        <div style="font-weight:700;color:#d0c0e8;font-size:13px">${cat.name} <span style="color:#ffd700;font-size:11px">Lv ${lvl}</span></div>
+        <div style="font-size:11px;margin-top:4px">
+          <span style="color:#6fbbff">+${bonusChips} chips</span>
+          <span style="color:#8878a8;margin:0 4px">|</span>
+          <span style="color:#ff6b6b">+${bonusMult} mult</span>
+        </div>
+      </div>`;
+    }
+  });
+  if(!hasLevels)html+=`<div style="color:#6858a0;font-size:12px;padding:10px">No category levels yet</div>`;
+  html+=`</div>`;
+
+  // Charm Bonuses Section
+  html+=`<h3 style="color:#a090c0;margin-top:20px;border-bottom:1px solid rgba(120,80,200,0.2);padding-bottom:6px">Active Charm Bonuses</h3>`;
+  html+=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px">`;
+  if(G.charms.length===0){
+    html+=`<div style="color:#6858a0;font-size:12px;padding:10px">No charms equipped</div>`;
+  }else{
+    G.charms.forEach((ch,i)=>{
+      const disabled=G.disabledCharms.includes(i);
+      let bonusText='';
+      if(ch.chips)bonusText+=`<span style="color:#6fbbff">+${ch.chips} chips</span> `;
+      if(ch.mult)bonusText+=`<span style="color:#ff6b6b">+${ch.mult} mult</span> `;
+      if(ch.accumulated&&ch.scaleStat){
+        const total=ch.scaleStat==='chips'?ch.accumulated:ch.accumulated;
+        bonusText+=`<span style="color:#7ee87e">Accumulated: +${total} ${ch.scaleStat}</span>`;
+      }
+      if(!bonusText)bonusText=`<span style="color:#8878a8">${ch.desc}</span>`;
+      html+=`<div style="background:rgba(25,20,45,0.9);border:1px solid rgba(120,80,200,0.25);border-radius:8px;padding:10px;${disabled?'opacity:0.4':''}">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">${ch.icon||'?'}</span>
+          <div style="font-weight:700;color:#d0c0e8;font-size:12px">${ch.name}${disabled?' (disabled)':''}</div>
+        </div>
+        <div style="font-size:11px;margin-top:6px">${bonusText}</div>
+      </div>`;
+    });
+  }
+  html+=`</div>`;
+
+  // Die Modifications Section
+  html+=`<h3 style="color:#90a8c0;margin-top:20px;border-bottom:1px solid rgba(144,168,192,0.2);padding-bottom:6px">Die Modifications</h3>`;
+  html+=`<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">`;
+  let hasMods=false;
+  const modColors={weighted:'#d4a520',lucky:'#40e060',steel:'#90a8c0',gilded:'#ffd700',void:'#a050e0',wild:'#ff60ff',cursed:'#e03030',mirrored:'#50c0e8'};
+  const modDescs={weighted:'More likely to roll 5-6',lucky:'+2 chips when scored',steel:'Always counts as 3',gilded:'+$1 when scored',void:'Random value, ×2 chips',wild:'Counts as any number',cursed:'×1.5 mult, but -1 hand on 1',mirrored:'Copies adjacent die'};
+  for(let i=0;i<5;i++){
+    if(G.mods[i]){
+      hasMods=true;
+      html+=`<div style="background:rgba(25,20,45,0.9);border:1px solid ${modColors[G.mods[i]]||'#7848c0'}40;border-radius:8px;padding:10px;min-width:100px;text-align:center">
+        <div style="font-weight:700;color:${modColors[G.mods[i]]||'#d0c0e8'};font-size:13px;text-transform:capitalize">Die ${i+1}: ${G.mods[i]}</div>
+        <div style="font-size:10px;color:#8878a8;margin-top:4px">${modDescs[G.mods[i]]||''}</div>
+      </div>`;
+    }
+  }
+  if(!hasMods)html+=`<div style="color:#6858a0;font-size:12px;padding:10px">No die modifications</div>`;
+  html+=`</div>`;
+
+  // Enemy Effects Section
+  const enemy=getEnemy();
+  if(enemy&&enemy.effect!=='none'){
+    html+=`<h3 style="color:#e8a0a0;margin-top:20px;border-bottom:1px solid rgba(232,160,160,0.2);padding-bottom:6px">Current Enemy Effect</h3>`;
+    html+=`<div style="background:rgba(40,20,20,0.6);border:1px solid rgba(232,160,160,0.25);border-radius:8px;padding:12px;margin-top:8px">
+      <div style="font-weight:700;color:#e8a0a0;font-size:14px">${enemy.name}</div>
+      <div style="font-size:12px;color:#c09090;margin-top:4px">${enemy.desc}</div>
+    </div>`;
+  }
+
+  html+=`<div class="text-center" style="margin-top:24px">
+    <button class="btn btn-primary" onclick="closeOverlay()" style="padding:12px 36px">CLOSE</button>
+  </div></div>`;
+  showOverlay(html);
+}
 
 function showTitleScreen(){
   G.phase='title';
@@ -1019,6 +1397,7 @@ window.switchInfoTab=function(tab,btn){
 };
 
 function startRun(){
+  playSound('click');
   newRun();closeOverlay();
   offerCharmPick('Choose a Starting Charm',getRandomCharms('common',3),()=>startEncounter());
 }
@@ -1041,7 +1420,7 @@ function offerCharmPick(title,choices,onDone){
   html+='</div>';showOverlay(html);
   window._pickChoices=choices;window._pickCallback=onDone;
 }
-window.pickCharm=function(i){const ch=window._pickChoices[i];if(G.charms.length<G.maxCharmSlots)G.charms.push({...ch});closeOverlay();window._pickCallback()};
+window.pickCharm=function(i){playSound('charm');const ch=window._pickChoices[i];if(G.charms.length<G.maxCharmSlots)G.charms.push({...ch});closeOverlay();window._pickCallback()};
 
 function showTrialReward(){
   const rc=getRandomCharms('rare',1);const bl=shuffle(BLESSINGS).slice(0,1);const blCat=getCatDef(bl[0].category);
@@ -1106,16 +1485,16 @@ function renderShop(){
 }
 
 function trackMidasSpend(amount){G.charms.forEach(ch=>{if(ch.id==='midas_touch')ch.accumulated=(ch.accumulated||0)+amount*2})}
-window.buyShopCharm=function(i){const c=window._shopCharms[i];if(!c)return;const dc=shopDiscount(c.cost);if(G.gold<dc||G.charms.length>=G.maxCharmSlots)return;G.gold-=dc;trackMidasSpend(dc);G.charms.push({...c,accumulated:c.accumulated||0});window._shopSold['c'+i]=true;renderShop()};
-window.buyShopBlessing=function(){const b=window._shopBlessing;if(G.gold<b.cost)return;G.gold-=b.cost;trackMidasSpend(b.cost);G.catLevels[b.category]=(G.catLevels[b.category]||0)+1;window._shopSold.bl=true;renderShop()};
-window.buyShopEnchantment=function(){const e=window._shopEnchantment;if(G.gold<e.cost||G.enchantments.length>=G.maxEnchSlots)return;G.gold-=e.cost;trackMidasSpend(e.cost);G.enchantments.push({...e});window._shopSold.en=true;renderShop()};
-window.buyShopSpecial=function(){const s=window._shopSpecial;if(G.gold<s.cost)return;G.gold-=s.cost;trackMidasSpend(s.cost);if(s.effect==='extra_hand')G.extraHandNext++;if(s.effect==='extra_reroll')G.extraRerollNext++;if(s.effect==='dice_polish')G.dicePolishNext=true;if(s.effect==='charm_slot')G.maxCharmSlots++;window._shopSold.sp=true;renderShop()};
+window.buyShopCharm=function(i){const c=window._shopCharms[i];if(!c)return;const dc=shopDiscount(c.cost);if(G.gold<dc||G.charms.length>=G.maxCharmSlots)return;playSound('charm');G.gold-=dc;trackMidasSpend(dc);G.charms.push({...c,accumulated:c.accumulated||0});window._shopSold['c'+i]=true;renderShop()};
+window.buyShopBlessing=function(){const b=window._shopBlessing;if(G.gold<b.cost)return;playSound('buy');G.gold-=b.cost;trackMidasSpend(b.cost);G.catLevels[b.category]=(G.catLevels[b.category]||0)+1;window._shopSold.bl=true;renderShop()};
+window.buyShopEnchantment=function(){const e=window._shopEnchantment;if(G.gold<e.cost||G.enchantments.length>=G.maxEnchSlots)return;playSound('buy');G.gold-=e.cost;trackMidasSpend(e.cost);G.enchantments.push({...e});window._shopSold.en=true;renderShop()};
+window.buyShopSpecial=function(){const s=window._shopSpecial;if(G.gold<s.cost)return;playSound('buy');G.gold-=s.cost;trackMidasSpend(s.cost);if(s.effect==='extra_hand')G.extraHandNext++;if(s.effect==='extra_reroll')G.extraRerollNext++;if(s.effect==='dice_polish')G.dicePolishNext=true;if(s.effect==='charm_slot')G.maxCharmSlots++;window._shopSold.sp=true;renderShop()};
 window.sellCharm=function(i){const ch=G.charms[i];let sellPrice=Math.floor((ch.cost||4)/2);if(ch.id==='piggy_bank')sellPrice+=(ch.accumulated||0);G.gold+=sellPrice;G.charms.splice(i,1);renderShop()};
 window.rerollShop=function(){if(G.gold<G.shopRerollCost)return;G.gold-=G.shopRerollCost;trackMidasSpend(G.shopRerollCost);G.shopRerollCost++;window._shopCharms=getRandomCharms(null,2);window._shopBlessing=shuffle(BLESSINGS)[0];window._shopEnchantment=shuffle(ENCHANTMENTS)[0];window._shopSpecial=shuffle(SPECIALS)[0];window._shopSold={};renderShop()};
-window.leaveShop=function(){closeOverlay();startEncounter()};
+window.leaveShop=function(){playSound('click');closeOverlay();startEncounter()};
 
 function showVictory(){
-  G.phase='victory';screenShake();
+  G.phase='victory';screenShake();playSound('victory');
   showOverlay(`<div class="victory text-center">
     <div style="font-size:50px;animation:float 2s ease-in-out infinite">\u{1F3C6}</div>
     <h1>VICTORY!</h1>
@@ -1130,7 +1509,7 @@ function showVictory(){
 }
 
 function showDefeat(){
-  G.phase='defeat';const e=getEnemy();screenShake();
+  G.phase='defeat';const e=getEnemy();screenShake();playSound('defeat');
   showOverlay(`<div class="text-center">
     <div style="font-size:40px;margin-bottom:10px">\u{1F480}</div>
     <h2 style="color:#ff6b6b;font-size:28px;letter-spacing:1px">DEFEATED</h2>
