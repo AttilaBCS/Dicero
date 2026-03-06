@@ -233,6 +233,14 @@ body{
   animation:pulseGlow 2s infinite;
   box-shadow:0 0 12px rgba(255,215,0,0.15);
 }
+.charm-slot[draggable="true"]{cursor:grab}
+.charm-slot[draggable="true"]:active{cursor:grabbing}
+.charm-slot.dragging{opacity:0.4;transform:scale(0.95);border-color:rgba(160,120,255,0.6)}
+.charm-slot.drag-over,.empty-charm.drag-over{
+  border-color:rgba(160,120,255,0.8);
+  background:rgba(120,80,200,0.12);
+  box-shadow:0 0 20px rgba(120,80,200,0.3),inset 0 0 12px rgba(120,80,200,0.08);
+}
 .empty-charm{
   border:1.5px dashed rgba(120,80,200,0.15);border-radius:10px;
   color:#2a2050;text-align:center;padding:16px 8px;font-size:11px;
