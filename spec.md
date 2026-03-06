@@ -38,7 +38,7 @@ These are the Yahtzee-style hands the player can form. Each category has a **bas
 | **Full House** | 3 of one value + 2 of another | 40 | 4 |
 | **Small Straight** | 4 sequential dice (e.g., 1-2-3-4 or 3-4-5-6) | 45 | 4 |
 | **Large Straight** | 5 sequential dice (1-2-3-4-5 or 2-3-4-5-6) | 80 | 7 |
-| **Yahtzee** | All 5 dice showing the same value | 100 | 10 |
+| **Dicero** | All 5 dice showing the same value | 100 | 10 |
 | **Chance** | Any combination; score = sum of all dice | 15 | 2 |
 
 **Note:** Unlike traditional Yahtzee, categories are **not** consumed after use. The player can score the same category multiple times across rounds. This is essential for build-crafting — if your build is centered around Full Houses, you need to be able to play them repeatedly.
@@ -88,7 +88,7 @@ Each enemy within a Trial is a named creature with flavor text and a **minor pas
 | **Ember Golem** | Ones count as 0 for chip calculation (but still count for combinations). |
 | **Flame Keeper** | Target score increases by 50 for each hand you use. |
 | **Molten Sentinel** | Dice showing 6 are "scorched" — they can't be kept between rerolls. |
-| **BOSS: Pyraxxus, the Undying Flame** | *Boss modifier: All dice showing a randomly selected number (chosen at start) are debuffed — they contribute 0 chips and don't trigger Charm effects.* |
+| **BOSS: Pyraxxus, the Undying Flame** | *Boss modifier: Sixes are debuffed — they contribute 0 chips and don't trigger Charm effects.* |
 
 ### Trial 2: The Hollow Depths
 *Beneath the earth, in fungal caverns and flooded crypts, forgotten things lurk.*
@@ -132,7 +132,7 @@ Each enemy within a Trial is a named creature with flavor text and a **minor pas
 | Enemy | Passive Effect |
 |---|---|
 | **Stellar Wisp** | Your rerolls cost $1 each (from your gold). |
-| **Constellation Beast** | Only categories using all 5 dice (Yahtzee, Large Straight, Chance with all 5) give full mult. Others give half mult. |
+| **Constellation Beast** | Only categories using all 5 dice (Dicero, Large Straight, Chance with all 5) give full mult. Others give half mult. |
 | **Astral Arbiter** | You must beat a minimum score of 20,000 on each individual hand, or it counts as 0. |
 | **Celestial Mimic** | Copies the passive effect of a random enemy from a previous Trial. |
 | **Fate Spinner** | After you choose dice to keep, there's a 25% chance each kept die rerolls anyway. |
@@ -264,7 +264,7 @@ Each use of a Blessing permanently increases the base chips and base mult of the
 | **Blessing of Dominion** | Four of a Kind | +15 | +2 |
 | **Blessing of the Path** | Small Straight | +15 | +2 |
 | **Blessing of the Journey** | Large Straight | +20 | +3 |
-| **Blessing of Perfection** | Yahtzee | +25 | +4 |
+| **Blessing of Perfection** | Dicero | +25 | +4 |
 | **Blessing of Fortune** | Chance | +10 | +1 |
 
 ---
