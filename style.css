@@ -36,6 +36,31 @@
 @keyframes glowPulse{0%,100%{box-shadow:0 0 15px rgba(120,80,200,0.2)}50%{box-shadow:0 0 45px rgba(120,80,200,0.5)}}
 @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
 @keyframes diceIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+/* Four roll variants — JS randomly assigns one per die */
+@keyframes roll3d-a{
+  0%  {transform:rotateX(0deg) rotateY(0deg)}
+  30% {transform:rotateX(180deg) rotateY(90deg)}
+  65% {transform:rotateX(300deg) rotateY(195deg)}
+  100%{transform:rotateX(360deg) rotateY(270deg)}
+}
+@keyframes roll3d-b{
+  0%  {transform:rotateX(0deg) rotateY(0deg)}
+  35% {transform:rotateX(-150deg) rotateY(130deg)}
+  70% {transform:rotateX(-280deg) rotateY(250deg)}
+  100%{transform:rotateX(-360deg) rotateY(330deg)}
+}
+@keyframes roll3d-c{
+  0%  {transform:rotateX(0deg) rotateY(0deg)}
+  25% {transform:rotateX(90deg) rotateY(210deg)}
+  60% {transform:rotateX(200deg) rotateY(370deg)}
+  100%{transform:rotateX(270deg) rotateY(450deg)}
+}
+@keyframes roll3d-d{
+  0%  {transform:rotateX(0deg) rotateY(0deg)}
+  30% {transform:rotateX(240deg) rotateY(100deg)}
+  65% {transform:rotateX(390deg) rotateY(220deg)}
+  100%{transform:rotateX(450deg) rotateY(300deg)}
+}
 @keyframes keepGlow{0%,100%{box-shadow:0 0 20px rgba(232,208,128,0.3),0 8px 24px rgba(0,0,0,0.4)}50%{box-shadow:0 0 35px rgba(232,208,128,0.5),0 8px 24px rgba(0,0,0,0.4)}}
 @keyframes barFill{from{width:0}to{width:var(--fill-width)}}
 @keyframes goldShine{0%{text-shadow:0 0 8px rgba(255,215,0,0.4)}50%{text-shadow:0 0 20px rgba(255,215,0,0.8),0 0 40px rgba(255,215,0,0.3)}100%{text-shadow:0 0 8px rgba(255,215,0,0.4)}}
@@ -225,73 +250,68 @@ body{
 .die{
   width:92px;height:92px;
   border-radius:16px;
-  display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
   position:relative;
   border:3px solid rgba(100,80,160,0.4);
-  background:linear-gradient(145deg,#1c1640,#241e48,#1a1438);
-  color:#e8d8c0;
-  box-shadow:
-    0 8px 24px rgba(0,0,0,0.6),
-    0 2px 4px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.06),
-    inset 0 -2px 4px rgba(0,0,0,0.2);
-}
-.die::before{
-  content:'';position:absolute;inset:0;border-radius:13px;
-  background:linear-gradient(180deg,rgba(255,255,255,0.04) 0%,transparent 50%,rgba(0,0,0,0.1) 100%);
-  pointer-events:none;
+  background:transparent;
+  --die-face-bg:linear-gradient(145deg,#1c1640,#241e48,#1a1438);
+  box-shadow:0 8px 24px rgba(0,0,0,0.6),0 2px 4px rgba(0,0,0,0.3);
+  perspective:800px;
 }
 .die:hover{
   border-color:rgba(180,150,240,0.7);
   transform:scale(1.12) translateY(-4px);
-  box-shadow:
-    0 14px 36px rgba(120,80,200,0.35),
-    0 4px 8px rgba(0,0,0,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow:0 14px 36px rgba(120,80,200,0.35),0 4px 8px rgba(0,0,0,0.3);
 }
 .die.kept{
-  animation:diceKeep 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
   border-color:#e8d080;
-  background:linear-gradient(145deg,#2a2250,#322a5c,#28204a);
-  box-shadow:
-    0 0 32px rgba(232,208,128,0.4),
-    0 10px 28px rgba(0,0,0,0.4),
-    inset 0 1px 0 rgba(255,215,0,0.1);
-  animation:diceKeep 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards, keepGlow 2s ease-in-out infinite 0.35s;
+  --die-face-bg:linear-gradient(145deg,#2a2250,#322a5c,#28204a);
+  box-shadow:0 0 32px rgba(232,208,128,0.4),0 10px 28px rgba(0,0,0,0.4);
+  animation:diceKeep 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards,keepGlow 2s ease-in-out infinite 0.35s;
 }
-.die.rolling{animation:diceRoll 0.5s ease-out}
+.die.rolling{animation:none}
+.die.rolling .die-cube{animation:roll3d-a 0.42s ease-out}
 .die.unrolled{
   border-color:rgba(200,60,60,0.6);
-  background:linear-gradient(145deg,#2a1418,#381a1e,#241012);
-  box-shadow:
-    0 8px 24px rgba(0,0,0,0.6),
-    0 0 20px rgba(200,60,60,0.2),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+  --die-face-bg:linear-gradient(145deg,#2a1418,#381a1e,#241012);
+  box-shadow:0 8px 24px rgba(0,0,0,0.6),0 0 20px rgba(200,60,60,0.2);
   cursor:not-allowed;
 }
 .die.unrolled:hover{
   border-color:rgba(200,60,60,0.7);
   transform:scale(1.02);
-  box-shadow:
-    0 8px 24px rgba(0,0,0,0.6),
-    0 0 24px rgba(200,60,60,0.25);
+  box-shadow:0 8px 24px rgba(0,0,0,0.6),0 0 24px rgba(200,60,60,0.25);
 }
 .die.unrolled .die-dot{
-  background:radial-gradient(circle at 30% 30%, #e88080, #c06060, #a04040);
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.6),
-    0 0 6px rgba(200,60,60,0.3),
-    inset 0 -1px 2px rgba(0,0,0,0.2);
+  background:radial-gradient(circle at 30% 30%,#e88080,#c06060,#a04040);
+  box-shadow:0 2px 4px rgba(0,0,0,0.6),0 0 6px rgba(200,60,60,0.3),inset 0 -1px 2px rgba(0,0,0,0.2);
 }
 .die.scored{
   border-color:#50e060;
-  box-shadow:
-    0 0 30px rgba(80,224,96,0.4),
-    0 0 60px rgba(80,224,96,0.15),
-    inset 0 0 12px rgba(80,224,96,0.08);
-  background:linear-gradient(145deg,#162a18,#1e361e,#142a14);
+  --die-face-bg:linear-gradient(145deg,#162a18,#1e361e,#142a14);
+  box-shadow:0 0 30px rgba(80,224,96,0.4),0 0 60px rgba(80,224,96,0.15);
 }
+
+/* 3D Die Structure */
+.die-3d-scene{width:100%;height:100%;transform-style:preserve-3d}
+.die-cube{
+  width:100%;height:100%;
+  position:relative;transform-style:preserve-3d;
+  transition:transform 0.15s ease-out;
+}
+.die-face{
+  position:absolute;inset:0;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--die-face-bg,linear-gradient(145deg,#1c1640,#241e48,#1a1438));
+  backface-visibility:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.07),inset 0 -2px 4px rgba(0,0,0,0.25);
+}
+.die-face.face-front {transform:translateZ(46px)}
+.die-face.face-back  {transform:rotateY(180deg) translateZ(46px)}
+.die-face.face-right {transform:rotateY(90deg) translateZ(46px)}
+.die-face.face-left  {transform:rotateY(-90deg) translateZ(46px)}
+.die-face.face-top   {transform:rotateX(90deg) translateZ(46px)}
+.die-face.face-bottom{transform:rotateX(-90deg) translateZ(46px)}
 
 /* Die dot patterns */
 .die-dots{
@@ -320,43 +340,43 @@ body{
 /* Die modifications */
 .die.mod-weighted{
   border-color:#d4a520;
-  background:linear-gradient(145deg,#302818,#3a3020,#282010);
-  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(212,165,32,0.3),inset 0 0 20px rgba(212,165,32,0.08);
+  --die-face-bg:linear-gradient(145deg,#302818,#3a3020,#282010);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(212,165,32,0.3);
 }
 .die.mod-lucky{
   border-color:#40e060;
-  background:linear-gradient(145deg,#142a18,#1a3420,#102a14);
-  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(64,224,96,0.3),inset 0 0 20px rgba(64,224,96,0.08);
+  --die-face-bg:linear-gradient(145deg,#142a18,#1a3420,#102a14);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(64,224,96,0.3);
 }
 .die.mod-steel{
   border-color:#90a8c0;
-  background:linear-gradient(145deg,#1e2838,#243040,#1a2430);
-  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(144,168,192,0.25),inset 0 0 20px rgba(144,168,192,0.08);
+  --die-face-bg:linear-gradient(145deg,#1e2838,#243040,#1a2430);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(144,168,192,0.25);
 }
 .die.mod-gilded{
   border-color:#ffd700;
-  background:linear-gradient(145deg,#302808,#3a3010,#282004);
-  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 28px rgba(255,215,0,0.4),inset 0 0 20px rgba(255,215,0,0.1);
+  --die-face-bg:linear-gradient(145deg,#302808,#3a3010,#282004);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 28px rgba(255,215,0,0.4);
 }
 .die.mod-void{
   border-color:#a050e0;
-  background:linear-gradient(145deg,#1e1030,#281840,#180c2c);
-  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 28px rgba(160,80,224,0.4),inset 0 0 24px rgba(160,80,224,0.12);
+  --die-face-bg:linear-gradient(145deg,#1e1030,#281840,#180c2c);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 28px rgba(160,80,224,0.4);
 }
 .die.mod-wild{
   border-image:linear-gradient(135deg,#ff6060,#ffd700,#60ff60,#6060ff,#ff60ff) 1;
-  background:linear-gradient(145deg,#1e1828,#281e38);
+  --die-face-bg:linear-gradient(145deg,#1e1828,#281e38);
   box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(200,100,255,0.3);
 }
 .die.mod-cursed{
   border-color:#e03030;
-  background:linear-gradient(145deg,#2a1010,#381414,#280c0c);
-  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(224,48,48,0.35),inset 0 0 20px rgba(224,48,48,0.1);
+  --die-face-bg:linear-gradient(145deg,#2a1010,#381414,#280c0c);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(224,48,48,0.35);
 }
 .die.mod-mirrored{
   border-color:#50c0e8;
-  background:linear-gradient(145deg,#101828,#142030,#0c1420);
-  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(80,192,232,0.3),inset 0 0 20px rgba(80,192,232,0.08);
+  --die-face-bg:linear-gradient(145deg,#101828,#142030,#0c1420);
+  box-shadow:0 8px 24px rgba(0,0,0,0.5),0 0 24px rgba(80,192,232,0.3);
 }
 
 .die-mod-label{
@@ -370,6 +390,9 @@ body{
   box-shadow:0 2px 6px rgba(0,0,0,0.4);
 }
 .die-hidden .die-dot{background:rgba(80,60,140,0.5)!important;box-shadow:none!important}
+
+/* --- FIREWORKS CANVAS --- */
+#fireworks-canvas{position:fixed;inset:0;z-index:10000;pointer-events:none;display:none}
 
 /* --- SCORE DISPLAY --- */
 #score-display{
@@ -756,13 +779,25 @@ body{
 @media(max-width:1000px){
   #charms-panel{width:180px;min-width:180px}
   #categories-panel{width:200px;min-width:200px}
-  .die{width:76px;height:76px}
+  .die{width:76px;height:76px;perspective:660px}
+  .die-face.face-front {transform:translateZ(38px)}
+  .die-face.face-back  {transform:rotateY(180deg) translateZ(38px)}
+  .die-face.face-right {transform:rotateY(90deg) translateZ(38px)}
+  .die-face.face-left  {transform:rotateY(-90deg) translateZ(38px)}
+  .die-face.face-top   {transform:rotateX(90deg) translateZ(38px)}
+  .die-face.face-bottom{transform:rotateX(-90deg) translateZ(38px)}
   .die-dots{width:50px;height:50px}
   .die-dot{width:11px;height:11px}
 }
 @media(max-width:750px){
   #charms-panel,#categories-panel{display:none}
-  .die{width:68px;height:68px}
+  .die{width:68px;height:68px;perspective:590px}
+  .die-face.face-front {transform:translateZ(34px)}
+  .die-face.face-back  {transform:rotateY(180deg) translateZ(34px)}
+  .die-face.face-right {transform:rotateY(90deg) translateZ(34px)}
+  .die-face.face-left  {transform:rotateY(-90deg) translateZ(34px)}
+  .die-face.face-top   {transform:rotateX(90deg) translateZ(34px)}
+  .die-face.face-bottom{transform:rotateX(-90deg) translateZ(34px)}
   .die-dots{width:46px;height:46px}
   .die-dot{width:10px;height:10px}
   #score-display{min-width:auto;padding:10px 16px}

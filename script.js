@@ -312,6 +312,70 @@ function screenShake(){
 }
 
 // ============================================================
+// FIREWORKS (boss defeat)
+// ============================================================
+function triggerFireworks(){
+  const canvas=document.getElementById('fireworks-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+  canvas.style.display='block';
+
+  const colors=['#ff6b6b','#ffd700','#6bffb8','#6b9fff','#ff6bff','#ffb86b','#ffffff','#ff9f43'];
+  const particles=[];
+
+  function burst(x,y){
+    for(let i=0;i<120;i++){
+      const angle=Math.random()*Math.PI*2;
+      const speed=2+Math.random()*8;
+      particles.push({
+        x,y,
+        vx:Math.cos(angle)*speed,
+        vy:Math.sin(angle)*speed-2,
+        color:colors[Math.floor(Math.random()*colors.length)],
+        size:2+Math.random()*4,
+        alpha:1,
+        gravity:0.07+Math.random()*0.05,
+        decay:0.011+Math.random()*0.009,
+      });
+    }
+  }
+
+  // Stagger bursts across the screen
+  const spots=[[0.25,0.25],[0.75,0.2],[0.5,0.15],[0.15,0.45],[0.85,0.4],[0.5,0.45],[0.3,0.12],[0.7,0.3]];
+  spots.forEach(([rx,ry],i)=>setTimeout(()=>burst(rx*canvas.width,ry*canvas.height),i*280));
+
+  const endTime=Date.now()+4000;
+  function animate(){
+    ctx.fillStyle='rgba(0,0,0,0.13)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x+=p.vx; p.y+=p.vy; p.vy+=p.gravity; p.vx*=0.99;
+      p.alpha-=p.decay;
+      if(p.alpha<=0){particles.splice(i,1);continue}
+      ctx.save();
+      ctx.globalAlpha=Math.max(0,p.alpha);
+      ctx.fillStyle=p.color;
+      ctx.shadowColor=p.color;
+      ctx.shadowBlur=8;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+    if(Date.now()<endTime||particles.length>0){
+      requestAnimationFrame(animate);
+    } else {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      canvas.style.display='none';
+    }
+  }
+  animate();
+}
+
+// ============================================================
 // DICE DOT LAYOUT — standard dice face positions (percentage-based)
 // ============================================================
 // Positions: TL, TC, TR, ML, MC, MR, BL, BC, BR as [left%, top%]
@@ -328,6 +392,17 @@ const DOT_FACES = {
   5:['TL','TR','MC','BL','BR'],
   6:['TL','TR','ML','MR','BL','BR'],
   7:['TL','TR','ML','MC','MR','BL','BR'], // The First Die (6+1)
+};
+
+// Cube rotations: which transform brings each face value to face the viewer
+const CUBE_ROTATIONS={
+  1:'rotateX(0deg) rotateY(0deg)',
+  2:'rotateX(-90deg) rotateY(0deg)',
+  3:'rotateY(-90deg)',
+  4:'rotateY(90deg)',
+  5:'rotateX(90deg) rotateY(0deg)',
+  6:'rotateY(180deg)',
+  7:'rotateX(0deg) rotateY(0deg)', // same face as 1, front face shows 7 dots
 };
 
 function createDieDots(value){
@@ -779,6 +854,16 @@ function render(){renderDice();renderCharms();renderCategories();renderHUD();ren
 
 function renderDice(){
   const area=document.getElementById('dice-area');area.innerHTML='';
+  const modColors={weighted:'#d4a520',lucky:'#40e060',steel:'#90a8c0',gilded:'#ffd700',void:'#a050e0',wild:'#ff60ff',cursed:'#e03030',mirrored:'#50c0e8'};
+  // Face value assignments: front=1, back=6, right=3, left=4, top=2, bottom=5
+  const faceMap=[
+    {cls:'face-front',val:1},
+    {cls:'face-back', val:6},
+    {cls:'face-right',val:3},
+    {cls:'face-left', val:4},
+    {cls:'face-top',  val:2},
+    {cls:'face-bottom',val:5},
+  ];
   for(let i=0;i<5;i++){
     const div=document.createElement('div');
     let cls='die';
@@ -787,12 +872,34 @@ function renderDice(){
     if(G.mods[i])cls+=` mod-${G.mods[i]}`;
     if(G.hidden[i])cls+=' die-hidden';
     div.className=cls;
-    const displayVal = G.dice[i] || 1;
-    const dotVal = getDieValue(i) || displayVal;
-    div.innerHTML=createDieDots(Math.min(dotVal,7));
+    const displayVal=G.dice[i]||1;
+    const dotVal=Math.min(getDieValue(i)||displayVal,7);
+
+    // Build 3D cube
+    const scene=document.createElement('div');
+    scene.className='die-3d-scene';
+    const cube=document.createElement('div');
+    cube.className='die-cube';
+    cube.style.transform=CUBE_ROTATIONS[dotVal]||CUBE_ROTATIONS[1];
+
+    faceMap.forEach(f=>{
+      const face=document.createElement('div');
+      face.className=`die-face ${f.cls}`;
+      // Front face shows actual value (including 7); other faces show their fixed value
+      const faceVal=(f.cls==='face-front')?dotVal:f.val;
+      face.innerHTML=createDieDots(faceVal);
+      cube.appendChild(face);
+    });
+
+    scene.appendChild(cube);
+    div.appendChild(scene);
+
     if(G.mods[i]){
-      const modColors={weighted:'#d4a520',lucky:'#40e060',steel:'#90a8c0',gilded:'#ffd700',void:'#a050e0',wild:'#ff60ff',cursed:'#e03030',mirrored:'#50c0e8'};
-      div.innerHTML+=`<span class="die-mod-label" style="color:${modColors[G.mods[i]]||'#a090c0'}">${G.mods[i]}</span>`;
+      const label=document.createElement('span');
+      label.className='die-mod-label';
+      label.style.color=modColors[G.mods[i]]||'#a090c0';
+      label.textContent=G.mods[i];
+      div.appendChild(label);
     }
     div.addEventListener('click',()=>toggleKeep(i));
     area.appendChild(div);
@@ -930,13 +1037,24 @@ function doRoll(){
   // Capture kept state at roll time to prevent race conditions
   const keptSnapshot = [...G.kept];
   const els=document.querySelectorAll('.die');
-  for(let i=0;i<5;i++)if(!keptSnapshot[i])els[i]?.classList.add('rolling');
+  const ROLL_VARIANTS=['roll3d-a','roll3d-b','roll3d-c','roll3d-d'];
+  let staggerMs=0;
+  for(let i=0;i<5;i++){
+    if(!keptSnapshot[i]){
+      els[i]?.classList.add('rolling');
+      const cube=els[i]?.querySelector('.die-cube');
+      if(cube){
+        const v=ROLL_VARIANTS[Math.floor(Math.random()*ROLL_VARIANTS.length)];
+        cube.style.animation=`${v} 0.42s ease-out ${staggerMs}ms both`;
+        staggerMs+=25+Math.floor(Math.random()*35);
+      }
+    }
+  }
   setTimeout(()=>{
-    // Use the snapshot for rolling, not current G.kept
     for(let i=0;i<5;i++)if(!keptSnapshot[i])G.dice[i]=rollDie(i);
     handlePostRoll();
     G.hasRolled=true;G.animating=false;render();
-  },500);
+  },620);
 }
 
 // Discards removed
@@ -1067,7 +1185,7 @@ function encounterWon(){
   });
   G.gold+=pay;
   G._lastPayBreakdown=breakdown;G._lastPayTotal=pay;
-  if(isBoss()){if(G.trial>=4){showVictory();return}showTrialReward()}
+  if(isBoss()){triggerFireworks();if(G.trial>=4){showVictory();return}showTrialReward()}
   else{G.encounter++;showShop()}
 }
 
