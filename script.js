@@ -351,13 +351,13 @@ const CATEGORIES = [
   {id:'fours',name:'Fours',desc:'All dice showing 4',baseChips:20,baseMult:3,chipPer:8,multPer:2,num:4},
   {id:'fives',name:'Fives',desc:'All dice showing 5',baseChips:20,baseMult:3,chipPer:8,multPer:2,num:5},
   {id:'sixes',name:'Sixes',desc:'All dice showing 6',baseChips:25,baseMult:3,chipPer:8,multPer:2,num:6},
-  {id:'three_kind',name:'Three of a Kind',desc:'3+ same value',baseChips:30,baseMult:3,chipPer:10,multPer:1},
-  {id:'four_kind',name:'Four of a Kind',desc:'4+ same value',baseChips:60,baseMult:5,chipPer:15,multPer:2},
-  {id:'full_house',name:'Full House',desc:'3 of one + 2 of another',baseChips:40,baseMult:4,chipPer:15,multPer:2},
-  {id:'small_straight',name:'Small Straight',desc:'4 sequential',baseChips:45,baseMult:4,chipPer:15,multPer:2},
-  {id:'large_straight',name:'Large Straight',desc:'5 sequential',baseChips:80,baseMult:7,chipPer:20,multPer:3},
-  {id:'yahtzee',name:'Dicero',desc:'All 5 same',baseChips:100,baseMult:10,chipPer:25,multPer:4},
-  {id:'chance',name:'Chance',desc:'Any combo, sum all',baseChips:15,baseMult:2,chipPer:10,multPer:1},
+  {id:'three_kind',name:'Three of a Kind',desc:'3+ same value',baseChips:35,baseMult:3,chipPer:12,multPer:1},
+  {id:'four_kind',name:'Four of a Kind',desc:'4+ same value',baseChips:65,baseMult:5,chipPer:15,multPer:2},
+  {id:'full_house',name:'Full House',desc:'3 of one + 2 of another',baseChips:45,baseMult:4,chipPer:15,multPer:2},
+  {id:'small_straight',name:'Small Straight',desc:'4 sequential',baseChips:50,baseMult:4,chipPer:15,multPer:2},
+  {id:'large_straight',name:'Large Straight',desc:'5 sequential',baseChips:85,baseMult:7,chipPer:20,multPer:3},
+  {id:'yahtzee',name:'Dicero',desc:'All 5 same',baseChips:100,baseMult:12,chipPer:25,multPer:4},
+  {id:'chance',name:'Chance',desc:'Any combo, sum all',baseChips:12,baseMult:2,chipPer:8,multPer:1},
 ];
 
 const TRIALS = [
@@ -377,7 +377,7 @@ const TRIALS = [
    ],
    boss:{name:'Gloomjaw, the Depth Devourer',effect:'gloomjaw',desc:'After each hand, your lowest-scoring used category is devoured (disabled).'}
   },
-  {name:'The Shattered Spire',desc:'Wind and lightning rage through fractured halls.',base:8000,bossTarget:24000,
+  {name:'The Shattered Spire',desc:'Wind and lightning rage through fractured halls.',base:6000,bossTarget:20000,
    enemies:[
      {name:'Storm Elemental',effect:'storm_elemental',desc:'Even-numbered dice give half chips.'},
      {name:'Skyborne Sentinel',effect:'skyborne_sentinel',desc:'Must score with 3+ dice or hand scores 0.'},
@@ -385,7 +385,7 @@ const TRIALS = [
    ],
    boss:{name:'Voltaryx, the Spire\'s Crown',effect:'voltaryx',desc:'Can\'t score the same category twice in a row.'}
   },
-  {name:'The Obsidian Rift',desc:'Dark glass and void energy twist the laws of chance.',base:40000,bossTarget:120000,
+  {name:'The Obsidian Rift',desc:'Dark glass and void energy twist the laws of chance.',base:30000,bossTarget:100000,
    enemies:[
      {name:'Void Flickerer',effect:'void_flickerer',desc:'One die is phased \u2014 random value each reroll, can\'t be kept.'},
      {name:'Glass Stalker',effect:'glass_stalker',desc:'Three of a Kind or lower: 10% of score is subtracted.'},
@@ -393,7 +393,7 @@ const TRIALS = [
    ],
    boss:{name:'Nihilex, the Rift Warden',effect:'nihilex',desc:'Two random numbers can\'t be scored (0 chips, don\'t count for combos).'}
   },
-  {name:'The Astral Throne',desc:'Beyond the mortal plane.',base:200000,bossTarget:600000,
+  {name:'The Astral Throne',desc:'Beyond the mortal plane.',base:150000,bossTarget:500000,
    enemies:[
      {name:'Stellar Wisp',effect:'stellar_wisp',desc:'Rerolls cost $1 each.'},
      {name:'Constellation Beast',effect:'constellation_beast',desc:'Only full-5-dice categories get full mult; others half.'},
@@ -504,6 +504,29 @@ const CHARMS = [
   {id:'piggy_bank',name:'Piggy Bank',icon:'🐷',rarity:'common',desc:'+$1 per encounter. Sell for accumulated gold.',type:'scaling',scaleStat:'gold',scaleAmt:1,accumulated:0,cost:3},
   {id:'merchant',name:'Merchant',icon:'🏪',rarity:'uncommon',desc:'Shop items cost $1 less (min $1).',type:'economy',cost:6},
   {id:'bounty_hunter',name:'Bounty Hunter',icon:'🎯',rarity:'uncommon',desc:'+$3 for winning on your last hand.',type:'economy',cost:7},
+
+  // --- CROSS-ARCHETYPE & UTILITY ---
+  {id:'mirror_match',name:'Mirror Match',icon:'🪞',rarity:'uncommon',desc:'If all 5 dice are the same parity (all odd or all even): +6 mult.',type:'on_score',cost:8},
+  {id:'underdog',name:'Underdog',icon:'🐕',rarity:'common',desc:'+4 mult when your score is below 50% of the target.',type:'on_score',cost:4},
+  {id:'last_stand',name:'Last Stand',icon:'🛡️',rarity:'rare',desc:'On your final hand: +10 mult, +30 chips.',type:'on_score',cost:13},
+  {id:'recycler',name:'Recycler',icon:'♻️',rarity:'common',desc:'+1 mult permanently each time you use all 3 rerolls in a hand.',type:'scaling',scaleStat:'mult',scaleAmt:1,accumulated:0,cost:5},
+  {id:'dice_whisperer',name:'Dice Whisperer',icon:'👂',rarity:'uncommon',desc:'+2 mult per unkept die when scoring (reward for scoring with fewer dice).',type:'on_score',cost:7},
+  {id:'lucky_clover',name:'Lucky Clover',icon:'☘️',rarity:'common',desc:'20% chance: +15 chips after each hand.',type:'on_score',cost:4},
+  {id:'overkill',name:'Overkill',icon:'💥',rarity:'rare',desc:'If you beat the target by 2x or more in a single hand: +$5.',type:'economy',cost:12},
+  {id:'minimalist',name:'Minimalist',icon:'✂️',rarity:'uncommon',desc:'+3 mult per empty charm slot.',type:'independent',cost:6},
+
+  // --- REROLL-FOCUSED ARCHETYPE ---
+  {id:'chaos_rider',name:'Chaos Rider',icon:'🌪️',rarity:'uncommon',desc:'+5 chips per reroll used this hand.',type:'on_score',cost:7},
+  {id:'turbulence',name:'Turbulence',icon:'🌊',rarity:'rare',desc:'If you used all rerolls: ×1.5 mult.',type:'on_score',cost:13},
+  {id:'reroll_addict',name:'Reroll Addict',icon:'🎡',rarity:'common',desc:'+1 reroll per encounter.',type:'passive',cost:6},
+
+  // --- DEFENSIVE / SURVIVAL ---
+  {id:'second_wind',name:'Second Wind',icon:'💨',rarity:'rare',desc:'Once per encounter: if a hand scores 0, gain +1 hand back.',type:'passive',usedThisEncounter:false,cost:14},
+  {id:'iron_will',name:'Iron Will',icon:'⚔️',rarity:'uncommon',desc:'+2 mult per hand already used this encounter.',type:'on_score',cost:8},
+
+  // --- MORE LEGENDARIES ---
+  {id:'alchemist',name:'The Alchemist',icon:'⚗️',rarity:'legendary',desc:'Chips and Mult are swapped before multiplying.',type:'on_score',cost:20},
+  {id:'golden_ratio',name:'Golden Ratio',icon:'🌀',rarity:'legendary',desc:'If dice show exactly 1-2-3-4-5: ×5 mult.',type:'on_score',cost:18},
 ];
 
 const ENCHANTMENTS = [
@@ -548,7 +571,7 @@ let G = null;
 
 function newRun(){
   G = {
-    gold:4,trial:0,encounter:0,
+    gold:5,trial:0,encounter:0,
     hands:4,maxHands:4,
     rerolls:3,maxRerolls:3,
     dice:[0,0,0,0,0],kept:[false,false,false,false,false],
@@ -683,7 +706,7 @@ function scoreHand(categoryId){
   const enemy=getEnemy();const noCharms=enemy.effect==='ash_wraith'&&G.rerollCount<=1;const nullP=enemy.effect==='null_prophet';
   G.charms.forEach((ch,ci)=>{
     if(G.disabledCharms.includes(ci))return;
-    if(ch.type==='independent'){if(ch.chips)chips+=ch.chips;if(ch.mult){let m=ch.mult;if(nullP)m=Math.floor(m/2);mult+=m}if(ch.chips||ch.mult)log.push(`${ch.name}: +${ch.chips||0} chips, +${ch.mult||0} mult`)}
+    if(ch.type==='independent'){if(ch.id==='minimalist'){const empty=G.maxCharmSlots-G.charms.length;if(empty>0){mult+=empty*3;log.push(`Minimalist: +${empty*3} mult (${empty} empty slots)`)}}else{if(ch.chips)chips+=ch.chips;if(ch.mult){let m=ch.mult;if(nullP)m=Math.floor(m/2);mult+=m}if(ch.chips||ch.mult)log.push(`${ch.name}: +${ch.chips||0} chips, +${ch.mult||0} mult`)}}
     if(ch.type==='on_category'&&ch.category===categoryId&&!noCharms){chips+=ch.chips||0;if(ch.catMult)mult+=ch.catMult;log.push(`${ch.name}: +${ch.chips||0} chips${ch.catMult?', +'+ch.catMult+' mult':''}`)}
     if(ch.type==='on_score'){
       if(ch.id==='warm_ember')si.forEach(i=>{if(G.dice[i]===1){chips+=5;log.push('Warm Ember: +5 chips (die 1)')}});
@@ -728,6 +751,17 @@ function scoreHand(categoryId){
       if(ch.id==='all_in'&&G.hands<=2){mult*=3;log.push('All In: ×3 mult!')}
       if(ch.id==='lucky_seven'){const s=G.dice.reduce((a,b)=>a+b,0);if(s===7){chips+=50;log.push('Lucky Seven: +50 chips (sum=7)')}}
       if(ch.id==='double_or_nothing'){if(Math.random()<0.5){mult*=2;log.push('Double or Nothing: ×2 mult!')}else{mult=Math.max(1,Math.floor(mult/2));log.push('Double or Nothing: ÷2 mult...')}}
+      // New utility/cross-archetype charms
+      if(ch.id==='mirror_match'){const parities=si.map(i=>G.dice[i]%2);if(si.length===5&&parities.every(p=>p===parities[0])){mult+=6;log.push(`Mirror Match: +6 mult (all ${parities[0]===0?'even':'odd'})`)}}
+      if(ch.id==='underdog'&&G.cumulativeScore<G.targetScore*0.5){mult+=4;log.push('Underdog: +4 mult (below 50%)')}
+      if(ch.id==='last_stand'&&G.hands<=1){chips+=30;mult+=10;log.push('Last Stand: +30 chips, +10 mult (final hand!)')}
+      if(ch.id==='dice_whisperer'){const unkept=5-si.length;if(unkept>0){mult+=unkept*2;log.push(`Dice Whisperer: +${unkept*2} mult (${unkept} unkept)`)}}
+      if(ch.id==='lucky_clover'&&Math.random()<0.2){chips+=15;log.push('Lucky Clover: +15 chips (lucky!)')}
+      if(ch.id==='chaos_rider'&&G.rerollCount>0){chips+=G.rerollCount*5;log.push(`Chaos Rider: +${G.rerollCount*5} chips (${G.rerollCount} rerolls)`)}
+      if(ch.id==='turbulence'&&G.rerollCount>=G.maxRerolls){mult=Math.ceil(mult*1.5);log.push('Turbulence: ×1.5 mult (all rerolls used)')}
+      if(ch.id==='iron_will'&&G.handsUsed>0){mult+=G.handsUsed*2;log.push(`Iron Will: +${G.handsUsed*2} mult (${G.handsUsed} hands used)`)}
+      if(ch.id==='alchemist'){const tmp=chips;chips=mult;mult=tmp;log.push(`The Alchemist: swapped! ${chips} chips × ${mult} mult`)}
+      if(ch.id==='golden_ratio'){const sorted=[...G.dice].sort();if(sorted.join('')==='12345'){mult*=5;log.push('Golden Ratio: ×5 mult (1-2-3-4-5!)')}}
     }
     if(ch.type==='on_reroll'&&ch.id==='gamblers_grin'&&G.rerollCount>0){mult+=G.rerollCount;log.push(`Gambler's Grin: +${G.rerollCount} mult`)}
     if(ch.type==='scaling'){
@@ -740,6 +774,7 @@ function scoreHand(categoryId){
       if(ch.id==='treasure_hunter'&&ch.accumulated){chips+=ch.accumulated;log.push(`Treasure Hunter: +${ch.accumulated} chips`)}
       if(ch.id==='herd_instinct'&&ch.accumulated){mult+=ch.accumulated;log.push(`Herd Instinct: +${ch.accumulated} mult`)}
       if(ch.id==='wanderlust'&&ch.accumulated){mult+=ch.accumulated;log.push(`Wanderlust: +${ch.accumulated} mult`)}
+      if(ch.id==='recycler'&&ch.accumulated){mult+=ch.accumulated;log.push(`Recycler: +${ch.accumulated} mult`)}
     }
     if(ch.id==='golden_bones'&&G.gold>=20){mult=Math.ceil(mult*1.5);log.push(`Golden Bones: \u00d71.5 mult`)}
     if(ch.id==='gamblers_ruin'){mult*=2;log.push("Gambler's Ruin: \u00d72 mult")}
@@ -799,6 +834,7 @@ function renderDice(){
   }
 }
 
+let _dragCharmIdx=null;
 function renderCharms(){
   const c=document.getElementById('charm-slots');c.innerHTML='';
   for(let i=0;i<G.maxCharmSlots;i++){
@@ -806,10 +842,20 @@ function renderCharms(){
       const ch=G.charms[i];const dis=G.disabledCharms.includes(i);
       const d=document.createElement('div');d.className='charm-slot';
       d.style.opacity=dis?'0.3':'1';
+      d.draggable=true;d.dataset.idx=i;
       d.innerHTML=`<div class="charm-header"><span class="charm-icon">${ch.icon||'?'}</span><div><div class="charm-name">${ch.name}</div><span class="charm-rarity rarity-${ch.rarity}">${ch.rarity}</span></div></div><div class="charm-desc">${ch.desc}</div>`;
+      d.addEventListener('dragstart',e=>{_dragCharmIdx=i;d.classList.add('dragging');e.dataTransfer.effectAllowed='move'});
+      d.addEventListener('dragend',()=>{_dragCharmIdx=null;d.classList.remove('dragging');document.querySelectorAll('.charm-slot,.empty-charm').forEach(el=>el.classList.remove('drag-over'))});
+      d.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';d.classList.add('drag-over')});
+      d.addEventListener('dragleave',()=>d.classList.remove('drag-over'));
+      d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('drag-over');if(_dragCharmIdx!==null&&_dragCharmIdx!==i){const moved=G.charms.splice(_dragCharmIdx,1)[0];G.charms.splice(i>_dragCharmIdx?i-1:i,0,moved);_dragCharmIdx=null;render()}});
       c.appendChild(d);
     } else {
-      const d=document.createElement('div');d.className='empty-charm';d.textContent='Empty';c.appendChild(d);
+      const d=document.createElement('div');d.className='empty-charm';d.textContent='Empty';
+      d.addEventListener('dragover',e=>{e.preventDefault();d.classList.add('drag-over')});
+      d.addEventListener('dragleave',()=>d.classList.remove('drag-over'));
+      d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('drag-over');if(_dragCharmIdx!==null){const moved=G.charms.splice(_dragCharmIdx,1)[0];G.charms.push(moved);_dragCharmIdx=null;render()}});
+      c.appendChild(d);
     }
   }
 }
@@ -979,6 +1025,10 @@ async function doScore(categoryId){
   G.charms.forEach(ch=>{if(ch.id==='wanderlust'&&['small_straight','large_straight'].includes(categoryId))ch.accumulated=(ch.accumulated||0)+2});
   // Momentum tracking
   G.charms.forEach(ch=>{if(ch.id==='momentum'){if(result.total>=200)ch._streak=(ch._streak||0)+1;else ch._streak=0}});
+  G.charms.forEach(ch=>{if(ch.id==='recycler'&&G.rerollCount>=G.maxRerolls)ch.accumulated=(ch.accumulated||0)+1});
+  G.charms.forEach(ch=>{if(ch.id==='overkill'&&result.total>=G.targetScore*2)G.gold+=5});
+  // Second Wind: if hand scored 0, get a hand back
+  G.charms.forEach(ch=>{if(ch.id==='second_wind'&&!ch.usedThisEncounter&&result.total===0){G.hands++;ch.usedThisEncounter=true}});
   // All In hand penalty
   G.charms.forEach(ch=>{if(ch.id==='all_in'&&G.hands>0){}});
   for(let i=0;i<5;i++)if(G.mods[i]==='cursed'&&G.dice[i]===1)G.hands=Math.max(0,G.hands-1);
@@ -1025,9 +1075,11 @@ function startEncounter(){
   G.disabledCategories=[];G.disabledCharms=[];
   G.turnBonusChips=0;G.turnBonusMult=0;
   G.kept=[false,false,false,false,false];G.hidden=[false,false,false,false,false];
-  G.phased=-1;G.flameKeeperBonus=0;G.shopRerollCost=1;
+  G.phased=-1;G.flameKeeperBonus=0;G.shopRerollCost=3;
   G.charms.forEach(ch=>{if(ch.id==='fate_bender')ch.usedThisEncounter=false});
   G.charms.forEach(ch=>{if(ch.id==='chrono_die')G.rerolls++});
+  G.charms.forEach(ch=>{if(ch.id==='reroll_addict')G.rerolls++});
+  G.charms.forEach(ch=>{if(ch.id==='second_wind')ch.usedThisEncounter=false});
   G.charms.forEach(ch=>{if(ch.id==='blood_pact')G.hands=Math.max(1,G.hands-1)});
   G.charms.forEach(ch=>{if(ch.id==='all_in')G.hands=Math.max(1,G.hands-1)});
   if(isBoss()){
@@ -1051,8 +1103,8 @@ function startEncounter(){
 function encounterWon(){
   playSound('victory');
   const breakdown=[];
-  let pay=isBoss()?5:3;
-  breakdown.push({label:isBoss()?'Boss bonus':'Win bonus',amount:isBoss()?5:3});
+  let pay=isBoss()?7:3;
+  breakdown.push({label:isBoss()?'Boss bonus':'Win bonus',amount:isBoss()?7:3});
   if(G.hands>0){breakdown.push({label:`Unused hands (${G.hands})`,amount:G.hands});pay+=G.hands}
   const interest=Math.min(5,Math.floor(G.gold/5));
   if(interest>0){breakdown.push({label:`Interest ($${G.gold}\u00f75)`,amount:interest});pay+=interest}
