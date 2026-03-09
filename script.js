@@ -420,31 +420,31 @@ function createDieDots(value){
 // GAME DATA
 // ============================================================
 const CATEGORIES = [
-  {id:'ones',name:'Ones',desc:'All dice showing 1',baseChips:15,baseMult:3,chipPer:8,multPer:2,num:1},
-  {id:'twos',name:'Twos',desc:'All dice showing 2',baseChips:15,baseMult:3,chipPer:8,multPer:2,num:2},
-  {id:'threes',name:'Threes',desc:'All dice showing 3',baseChips:15,baseMult:3,chipPer:8,multPer:2,num:3},
-  {id:'fours',name:'Fours',desc:'All dice showing 4',baseChips:20,baseMult:3,chipPer:8,multPer:2,num:4},
-  {id:'fives',name:'Fives',desc:'All dice showing 5',baseChips:20,baseMult:3,chipPer:8,multPer:2,num:5},
-  {id:'sixes',name:'Sixes',desc:'All dice showing 6',baseChips:25,baseMult:3,chipPer:8,multPer:2,num:6},
-  {id:'three_kind',name:'Three of a Kind',desc:'3+ same value',baseChips:35,baseMult:3,chipPer:12,multPer:1},
-  {id:'four_kind',name:'Four of a Kind',desc:'4+ same value',baseChips:65,baseMult:5,chipPer:15,multPer:2},
-  {id:'full_house',name:'Full House',desc:'3 of one + 2 of another',baseChips:45,baseMult:4,chipPer:15,multPer:2},
-  {id:'small_straight',name:'Small Straight',desc:'4 sequential',baseChips:50,baseMult:4,chipPer:15,multPer:2},
-  {id:'large_straight',name:'Large Straight',desc:'5 sequential',baseChips:85,baseMult:7,chipPer:20,multPer:3},
-  {id:'yahtzee',name:'Dicero',desc:'All 5 same',baseChips:100,baseMult:12,chipPer:25,multPer:4},
-  {id:'chance',name:'Chance',desc:'Any combo, sum all',baseChips:12,baseMult:2,chipPer:8,multPer:1},
+  {id:'ones',name:'Ones',desc:'All dice showing 1',baseChips:8,baseMult:3,chipPer:8,multPer:2,num:1},
+  {id:'twos',name:'Twos',desc:'All dice showing 2',baseChips:8,baseMult:3,chipPer:8,multPer:2,num:2},
+  {id:'threes',name:'Threes',desc:'All dice showing 3',baseChips:8,baseMult:3,chipPer:8,multPer:2,num:3},
+  {id:'fours',name:'Fours',desc:'All dice showing 4',baseChips:10,baseMult:3,chipPer:8,multPer:2,num:4},
+  {id:'fives',name:'Fives',desc:'All dice showing 5',baseChips:10,baseMult:3,chipPer:8,multPer:2,num:5},
+  {id:'sixes',name:'Sixes',desc:'All dice showing 6',baseChips:12,baseMult:3,chipPer:8,multPer:2,num:6},
+  {id:'three_kind',name:'Three of a Kind',desc:'3+ same value',baseChips:18,baseMult:3,chipPer:12,multPer:1},
+  {id:'four_kind',name:'Four of a Kind',desc:'4+ same value',baseChips:32,baseMult:5,chipPer:15,multPer:2},
+  {id:'full_house',name:'Full House',desc:'3 of one + 2 of another',baseChips:22,baseMult:4,chipPer:15,multPer:2},
+  {id:'small_straight',name:'Small Straight',desc:'4 sequential',baseChips:25,baseMult:4,chipPer:15,multPer:2},
+  {id:'large_straight',name:'Large Straight',desc:'5 sequential',baseChips:40,baseMult:7,chipPer:20,multPer:3},
+  {id:'yahtzee',name:'Dicero',desc:'All 5 same',baseChips:50,baseMult:12,chipPer:25,multPer:4},
+  {id:'chance',name:'Chance',desc:'Any combo, sum all',baseChips:6,baseMult:2,chipPer:8,multPer:1},
 ];
 
 const TRIALS = [
-  {name:'The Ember Sanctum',desc:'A crumbling temple lit by dying embers.',base:300,bossTarget:900,
+  {name:'The Ember Sanctum',desc:'A crumbling temple lit by dying embers.',base:150,bossTarget:450,
    enemies:[
      {name:'Cinder Imp',effect:'none',desc:'No effect.'},
      {name:'Ember Golem',effect:'ember_golem',desc:'Ones count as 0 chips (still count for combos).'},
-     {name:'Flame Keeper',effect:'flame_keeper',desc:'Target +50 for each hand used.'},
+     {name:'Flame Keeper',effect:'flame_keeper',desc:'Target +25 for each hand used.'},
    ],
    boss:{name:'Pyraxxus, the Undying Flame',effect:'pyraxxus',desc:'Sixes are debuffed \u2014 those dice give 0 chips and skip Charm effects.'}
   },
-  {name:'The Hollow Depths',desc:'Fungal caverns and flooded crypts.',base:1500,bossTarget:4500,
+  {name:'The Hollow Depths',desc:'Fungal caverns and flooded crypts.',base:750,bossTarget:2250,
    enemies:[
      {name:'Spore Crawler',effect:'spore_crawler',desc:'After first reroll, one random kept die is rerolled.'},
      {name:'Fungal Shaman',effect:'fungal_shaman',desc:'Chance category is disabled.'},
@@ -452,7 +452,7 @@ const TRIALS = [
    ],
    boss:{name:'Gloomjaw, the Depth Devourer',effect:'gloomjaw',desc:'After each hand, your lowest-scoring used category is devoured (disabled).'}
   },
-  {name:'The Shattered Spire',desc:'Wind and lightning rage through fractured halls.',base:6000,bossTarget:20000,
+  {name:'The Shattered Spire',desc:'Wind and lightning rage through fractured halls.',base:3000,bossTarget:10000,
    enemies:[
      {name:'Storm Elemental',effect:'storm_elemental',desc:'Even-numbered dice give half chips.'},
      {name:'Skyborne Sentinel',effect:'skyborne_sentinel',desc:'Must score with 3+ dice or hand scores 0.'},
@@ -460,7 +460,7 @@ const TRIALS = [
    ],
    boss:{name:'Voltaryx, the Spire\'s Crown',effect:'voltaryx',desc:'Can\'t score the same category twice in a row.'}
   },
-  {name:'The Obsidian Rift',desc:'Dark glass and void energy twist the laws of chance.',base:30000,bossTarget:100000,
+  {name:'The Obsidian Rift',desc:'Dark glass and void energy twist the laws of chance.',base:15000,bossTarget:50000,
    enemies:[
      {name:'Void Flickerer',effect:'void_flickerer',desc:'One die is phased \u2014 random value each reroll, can\'t be kept.'},
      {name:'Glass Stalker',effect:'glass_stalker',desc:'Three of a Kind or lower: 10% of score is subtracted.'},
@@ -468,7 +468,7 @@ const TRIALS = [
    ],
    boss:{name:'Nihilex, the Rift Warden',effect:'nihilex',desc:'Two random numbers can\'t be scored (0 chips, don\'t count for combos).'}
   },
-  {name:'The Astral Throne',desc:'Beyond the mortal plane.',base:150000,bossTarget:500000,
+  {name:'The Astral Throne',desc:'Beyond the mortal plane.',base:75000,bossTarget:250000,
    enemies:[
      {name:'Stellar Wisp',effect:'stellar_wisp',desc:'Rerolls cost $1 each.'},
      {name:'Constellation Beast',effect:'constellation_beast',desc:'Only full-5-dice categories get full mult; others half.'},
@@ -560,8 +560,8 @@ const CHARMS = [
 
   // --- MULT SCALING ENGINES ---
   {id:'rage_crystal',name:'Rage Crystal',icon:'💎',rarity:'uncommon',desc:'+0.5 mult permanently per hand played.',type:'scaling',scaleStat:'mult',scaleAmt:0.5,accumulated:0,cost:8},
-  {id:'inferno',name:'Inferno',icon:'🌋',rarity:'rare',desc:'×1.5 mult if your score this hand exceeds 500.',type:'on_score',cost:13},
-  {id:'momentum',name:'Momentum',icon:'🏎️',rarity:'uncommon',desc:'+2 mult for each consecutive hand that scores 200+. Resets on fail.',type:'on_score',cost:8},
+  {id:'inferno',name:'Inferno',icon:'🌋',rarity:'rare',desc:'×1.5 mult if your score this hand exceeds 250.',type:'on_score',cost:13},
+  {id:'momentum',name:'Momentum',icon:'🏎️',rarity:'uncommon',desc:'+2 mult for each consecutive hand that scores 100+. Resets on fail.',type:'on_score',cost:8},
   {id:'crescendo',name:'Crescendo',icon:'📈',rarity:'rare',desc:'Each hand this encounter: +2 mult (stacks).',type:'on_score',cost:14},
 
   // --- CHIP SCALING ENGINES ---
@@ -602,6 +602,18 @@ const CHARMS = [
   // --- MORE LEGENDARIES ---
   {id:'alchemist',name:'The Alchemist',icon:'⚗️',rarity:'legendary',desc:'Chips and Mult are swapped before multiplying.',type:'on_score',cost:20},
   {id:'golden_ratio',name:'Golden Ratio',icon:'🌀',rarity:'legendary',desc:'If dice show exactly 1-2-3-4-5: ×5 mult.',type:'on_score',cost:18},
+
+  // --- BLESSING-GRANTING CHARMS ---
+  {id:'scholar',name:'Scholar',icon:'📖',rarity:'uncommon',desc:'After winning an encounter, level up your most-used category this encounter.',type:'economy',cost:8},
+  {id:'ancient_tome',name:'Ancient Tome',icon:'📜',rarity:'rare',desc:'Every 3 encounters won, level up a random category.',type:'scaling',scaleStat:'bless',scaleAmt:0,accumulated:0,cost:13},
+  {id:'temple_pilgrim',name:'Temple Pilgrim',icon:'🏛️',rarity:'rare',desc:'On boss kill: level up 2 random categories.',type:'economy',cost:14},
+
+  // --- SINGLE-DIE / FEW-DICE SCORING (STEEL SUPPORT) ---
+  {id:'lone_wolf',name:'Lone Wolf',icon:'🐺',rarity:'uncommon',desc:'If scoring exactly 1 die: ×2.5 mult.',type:'on_score',cost:9},
+  {id:'sniper',name:'Sniper',icon:'🎯',rarity:'uncommon',desc:'If scoring exactly 1 or 2 dice: +20 chips, +3 mult.',type:'on_score',cost:8},
+  {id:'precision',name:'Precision',icon:'🔬',rarity:'rare',desc:'+4 mult per kept (unkept) die not used in scoring. Rewards holding steel dice.',type:'on_score',cost:14},
+  {id:'fortress',name:'Fortress',icon:'🏰',rarity:'common',desc:'+1 mult per kept die (whether scored or not).',type:'on_score',cost:5},
+  {id:'steel_forge',name:'Steel Forge',icon:'⚒️',rarity:'rare',desc:'Steel dice give +8 mult instead of +4.',type:'passive',cost:15},
 ];
 
 const ENCHANTMENTS = [
@@ -722,13 +734,13 @@ function handlePostRoll(){
   if(e.effect==='spore_crawler'&&G.rerollCount===1){const k=[];for(let i=0;i<5;i++)if(G.kept[i])k.push(i);if(k.length>0){const p=k[rng(0,k.length-1)];G.dice[p]=rollDie(p)}}
   if(e.effect==='gale_phantom'&&G.rerollCount>0){const ki=[],fi=[];for(let i=0;i<5;i++){if(G.kept[i])ki.push(i);else fi.push(i)}if(ki.length>0&&fi.length>0){const a=ki[rng(0,ki.length-1)],b=fi[rng(0,fi.length-1)];[G.dice[a],G.dice[b]]=[G.dice[b],G.dice[a]];G.kept[a]=false;G.kept[b]=true}}
   if(e.effect==='fate_spinner')for(let i=0;i<5;i++)if(G.kept[i]&&Math.random()<0.25){G.dice[i]=rollDie(i);G.kept[i]=false}
-  G.charms.forEach((ch,ci)=>{if(G.disabledCharms.includes(ci))return;if(ch.id==='snake_eyes'){const cc={};G.dice.forEach(d=>cc[d]=(cc[d]||0)+1);if(Object.values(cc).some(v=>v>=2))G.turnBonusChips+=20}});
+  G.charms.forEach((ch,ci)=>{if(G.disabledCharms.includes(ch.id))return;if(ch.id==='snake_eyes'){const cc={};G.dice.forEach(d=>cc[d]=(cc[d]||0)+1);if(Object.values(cc).some(v=>v>=2))G.turnBonusChips+=20}});
   // Loaded Dice: one random unkept die copies most common face
-  G.charms.forEach((ch,ci)=>{if(G.disabledCharms.includes(ci))return;if(ch.id==='loaded_dice'){const cc={};G.dice.forEach(d=>cc[d]=(cc[d]||0)+1);let best=G.dice[0],bestC=0;for(const[v,c]of Object.entries(cc)){if(c>bestC){bestC=c;best=Number(v)}}const unkept=[];for(let i=0;i<5;i++)if(!G.kept[i])unkept.push(i);if(unkept.length>0){const t=unkept[rng(0,unkept.length-1)];G.dice[t]=best}}});
+  G.charms.forEach((ch,ci)=>{if(G.disabledCharms.includes(ch.id))return;if(ch.id==='loaded_dice'){const cc={};G.dice.forEach(d=>cc[d]=(cc[d]||0)+1);let best=G.dice[0],bestC=0;for(const[v,c]of Object.entries(cc)){if(c>bestC){bestC=c;best=Number(v)}}const unkept=[];for(let i=0;i<5;i++)if(!G.kept[i])unkept.push(i);if(unkept.length>0){const t=unkept[rng(0,unkept.length-1)];G.dice[t]=best}}});
 }
 function getDieValue(i){
   let v=G.dice[i];
-  if(G.charms.some(ch=>ch.id==='the_first_die'&&!G.disabledCharms.includes(G.charms.indexOf(ch))))v+=1;
+  if(G.charms.some(ch=>ch.id==='the_first_die'&&!G.disabledCharms.includes(ch.id)))v+=1;
   return v;
 }
 function getDieChipValue(i){
@@ -747,23 +759,40 @@ function getDieChipValue(i){
 // SCORING CATEGORIES
 // ============================================================
 function detectCategories(dice){
-  const vals=dice.map((_,i)=>G.dice[i]);const counts={};vals.forEach(v=>counts[v]=(counts[v]||0)+1);
+  const vals=dice.map((_,i)=>G.dice[i]);
+  const wildIndices=[];for(let i=0;i<5;i++)if(G.mods[i]==='wild')wildIndices.push(i);
+  const nonWildVals=vals.filter((_,i)=>!wildIndices.includes(i));
   const results=[];const e=getEnemy();const banned=[];
   if(e.effect==='nihilex')banned.push(...G.bossBannedNums);
   if(e.effect==='aeonax')banned.push(...G.bossBannedNums);
   if(e.effect==='pyraxxus')banned.push(G.bossDebuffNum);
-  const cc={};vals.forEach(v=>{if(!banned.includes(v))cc[v]=(cc[v]||0)+1});
-  const cs=[...new Set(vals.filter(v=>!banned.includes(v)))].sort((a,b)=>a-b);
-  for(let n=1;n<=6;n++){const id=['ones','twos','threes','fours','fives','sixes'][n-1];if((cc[n]||0)>0)results.push({id,scoredDice:dice.map((_,i)=>vals[i]===n&&!banned.includes(n))})}
-  const mc=Math.max(...Object.values(cc),0);
+  // Count non-wild dice, then add wilds to best combo
+  const cc={};nonWildVals.forEach(v=>{if(!banned.includes(v))cc[v]=(cc[v]||0)+1});
+  const wc=wildIndices.length;
+  // For number categories, wild dice count toward each number
+  for(let n=1;n<=6;n++){const id=['ones','twos','threes','fours','fives','sixes'][n-1];const ct=(cc[n]||0)+wc;if(ct>0&&!banned.includes(n))results.push({id,scoredDice:dice.map((_,i)=>vals[i]===n||wildIndices.includes(i))})}
+  // For matching categories, add wilds to the most common value
+  const mcBase=Math.max(...Object.values(cc),0);const mc=mcBase+wc;
   if(mc>=3)results.push({id:'three_kind',scoredDice:dice.map(()=>true)});
   if(mc>=4)results.push({id:'four_kind',scoredDice:dice.map(()=>true)});
-  if(mc===5)results.push({id:'yahtzee',scoredDice:dice.map(()=>true)});
-  const cv=Object.values(cc);
-  if(cv.includes(3)&&cv.includes(2))results.push({id:'full_house',scoredDice:dice.map(()=>true)});
-  function hasCons(a,n){for(let i=0;i<=a.length-n;i++){let ok=true;for(let j=1;j<n;j++)if(a[i+j]!==a[i]+j){ok=false;break}if(ok)return true}return false}
-  if(hasCons(cs,4))results.push({id:'small_straight',scoredDice:dice.map(()=>true)});
-  if(hasCons(cs,5))results.push({id:'large_straight',scoredDice:dice.map(()=>true)});
+  if(mc>=5)results.push({id:'yahtzee',scoredDice:dice.map(()=>true)});
+  // Full house: check if wilds can fill gaps (e.g. 2+wild=3, or 1+2wilds=3)
+  const cv=Object.values(cc).sort((a,b)=>b-a);
+  let isFH=false;
+  if(cv.length>=2){let need3=Math.max(0,3-cv[0]),need2=Math.max(0,2-cv[1]);isFH=(need3+need2)<=wc}
+  else if(cv.length===1){isFH=cv[0]+wc>=5&&wc>=2} // one real value + wilds make 3+2
+  else{isFH=wc>=5}
+  if(isFH)results.push({id:'full_house',scoredDice:dice.map(()=>true)});
+  // Straights: add wilds as gap-fillers
+  const uniqueNonWild=[...new Set(nonWildVals.filter(v=>!banned.includes(v)))].sort((a,b)=>a-b);
+  function hasConsWithWild(sorted,need){
+    for(let start=1;start<=7-need;start++){
+      let gaps=0;for(let j=0;j<need;j++){if(!sorted.includes(start+j))gaps++}
+      if(gaps<=wc)return true;
+    }return false;
+  }
+  if(hasConsWithWild(uniqueNonWild,4))results.push({id:'small_straight',scoredDice:dice.map(()=>true)});
+  if(hasConsWithWild(uniqueNonWild,5))results.push({id:'large_straight',scoredDice:dice.map(()=>true)});
   results.push({id:'chance',scoredDice:dice.map(()=>true)});
   return results.filter(r=>!G.disabledCategories.includes(r.id));
 }
@@ -780,7 +809,7 @@ function scoreHand(categoryId){
   chips+=dc;
   const enemy=getEnemy();const noCharms=enemy.effect==='ash_wraith'&&G.rerollCount<=1;const nullP=enemy.effect==='null_prophet';
   G.charms.forEach((ch,ci)=>{
-    if(G.disabledCharms.includes(ci))return;
+    if(G.disabledCharms.includes(ch.id))return;
     if(ch.type==='independent'){if(ch.id==='minimalist'){const empty=G.maxCharmSlots-G.charms.length;if(empty>0){mult+=empty*3;log.push(`Minimalist: +${empty*3} mult (${empty} empty slots)`)}}else{if(ch.chips)chips+=ch.chips;if(ch.mult){let m=ch.mult;if(nullP)m=Math.floor(m/2);mult+=m}if(ch.chips||ch.mult)log.push(`${ch.name}: +${ch.chips||0} chips, +${ch.mult||0} mult`)}}
     if(ch.type==='on_category'&&ch.category===categoryId&&!noCharms){chips+=ch.chips||0;if(ch.catMult)mult+=ch.catMult;log.push(`${ch.name}: +${ch.chips||0} chips${ch.catMult?', +'+ch.catMult+' mult':''}`)}
     if(ch.type==='on_score'){
@@ -837,6 +866,11 @@ function scoreHand(categoryId){
       if(ch.id==='iron_will'&&G.handsUsed>0){mult+=G.handsUsed*2;log.push(`Iron Will: +${G.handsUsed*2} mult (${G.handsUsed} hands used)`)}
       if(ch.id==='alchemist'){const tmp=chips;chips=mult;mult=tmp;log.push(`The Alchemist: swapped! ${chips} chips × ${mult} mult`)}
       if(ch.id==='golden_ratio'){const sorted=[...G.dice].sort();if(sorted.join('')==='12345'){mult*=5;log.push('Golden Ratio: ×5 mult (1-2-3-4-5!)')}}
+      // Single-die / few-dice scoring (steel support)
+      if(ch.id==='lone_wolf'&&si.length===1){mult=Math.ceil(mult*2.5);log.push('Lone Wolf: ×2.5 mult (1 die!)')}
+      if(ch.id==='sniper'&&si.length<=2){chips+=20;mult+=3;log.push(`Sniper: +20 chips, +3 mult (${si.length} dice)`)}
+      if(ch.id==='precision'){let heldNotScored=0;for(let i=0;i<5;i++)if(G.kept[i]&&!sd[i])heldNotScored++;if(heldNotScored>0){mult+=heldNotScored*4;log.push(`Precision: +${heldNotScored*4} mult (${heldNotScored} held unscored)`)}}
+      if(ch.id==='fortress'){const keptCount=G.kept.filter(k=>k).length;if(keptCount>0){mult+=keptCount;log.push(`Fortress: +${keptCount} mult (${keptCount} kept)`)}}
     }
     if(ch.type==='on_reroll'&&ch.id==='gamblers_grin'&&G.rerollCount>0){mult+=G.rerollCount;log.push(`Gambler's Grin: +${G.rerollCount} mult`)}
     if(ch.type==='scaling'){
@@ -855,9 +889,9 @@ function scoreHand(categoryId){
     if(ch.id==='gamblers_ruin'){mult*=2;log.push("Gambler's Ruin: \u00d72 mult")}
     if(ch.id==='eternitys_gambit'&&ch.chosenCategory===categoryId){mult*=3;log.push("Eternity's Gambit: \u00d73 mult!")}
   });
-  G.charms.forEach((ch,ci)=>{if(G.disabledCharms.includes(ci))return;if(ch.id==='steady_hand'&&G.firstRerollDone){const k=G.kept.filter(x=>x).length;if(k>0){mult+=k;log.push(`Steady Hand: +${k} mult`)}}});
+  G.charms.forEach((ch,ci)=>{if(G.disabledCharms.includes(ch.id))return;if(ch.id==='steady_hand'&&G.firstRerollDone){const k=G.kept.filter(x=>x).length;if(k>0){mult+=k;log.push(`Steady Hand: +${k} mult`)}}});
   // Blueprint: copy first charm slot's independent bonuses
-  const bpCharm=G.charms.find((ch,ci)=>ch.id==='blueprint'&&!G.disabledCharms.includes(ci));
+  const bpCharm=G.charms.find((ch,ci)=>ch.id==='blueprint'&&!G.disabledCharms.includes(ch.id));
   if(bpCharm&&G.charms.length>0&&G.charms[0].id!=='blueprint'){
     const src=G.charms[0];
     if(src.type==='independent'){if(src.chips)chips+=src.chips;if(src.mult)mult+=src.mult;log.push(`Blueprint (${src.name}): +${src.chips||0} chips, +${src.mult||0} mult`)}
@@ -866,7 +900,7 @@ function scoreHand(categoryId){
   for(let i=0;i<5;i++){const m=G.mods[i];if(!m)continue;
     if(m==='gilded'&&sd[i]){chips+=10;log.push(`Die ${i+1} Gilded: +10 chips`)}
     if(m==='void'&&sd[i]){mult=Math.ceil(mult*1.5);log.push(`Die ${i+1} Void: \u00d71.5 mult`)}
-    if(m==='steel'&&G.kept[i]&&!sd[i]){mult+=4;log.push(`Die ${i+1} Steel: +4 mult`)}
+    if(m==='steel'&&G.kept[i]&&!sd[i]){const steelAmt=G.charms.some(ch=>ch.id==='steel_forge')?8:4;mult+=steelAmt;log.push(`Die ${i+1} Steel: +${steelAmt} mult`)}
     if(m==='cursed'&&sd[i]){mult+=8;log.push(`Die ${i+1} Cursed: +8 mult`)}
     if(m==='mirrored'&&sd[i]){const dv=getDieValue(i);mult+=dv;log.push(`Die ${i+1} Mirrored: +${dv} mult`)}
     if(m==='lucky'&&sd[i]&&Math.random()<0.25){const rt=getDieChipValue(i);chips+=rt;log.push(`Die ${i+1} Lucky: +${rt} chips`)}
@@ -875,9 +909,11 @@ function scoreHand(categoryId){
   if(enemy.effect==='voltaryx'&&G.lastScoredCategory===categoryId)return{chips:0,mult:0,total:0,log:['Voltaryx: Cannot repeat category!']};
   if(enemy.effect==='skyborne_sentinel'&&si.length<3)return{chips:0,mult:0,total:0,log:['Skyborne Sentinel: Need 3+ dice!']};
   chips+=G.turnBonusChips;mult+=G.turnBonusMult;
+  // Inferno: apply ×1.5 mult if pre-total exceeds threshold
+  G.charms.forEach(ch=>{if(ch.id==='inferno'){const pre=Math.floor(chips*mult);if(pre>=250){mult=Math.ceil(mult*1.5);log.push(`Inferno: ×1.5 mult (score ${pre} ≥ 250)`)}}});
   let total=Math.floor(chips*mult);
   if(enemy.effect==='glass_stalker'&&['ones','twos','threes','fours','fives','sixes','three_kind','chance'].includes(categoryId)){const p=Math.floor(total*0.1);total-=p;log.push(`Glass Stalker: -${p}`)}
-  if(enemy.effect==='astral_arbiter'&&total<20000){log.push('Astral Arbiter: Below 20K = 0!');total=0}
+  if(enemy.effect==='astral_arbiter'&&total<10000){log.push('Astral Arbiter: Below 10K = 0!');total=0}
   if(total<0)total=0;
   return{chips,mult,total,log,scoredIndices:si};
 }
@@ -946,7 +982,7 @@ function renderCharms(){
   const c=document.getElementById('charm-slots');c.innerHTML='';
   for(let i=0;i<G.maxCharmSlots;i++){
     if(i<G.charms.length){
-      const ch=G.charms[i];const dis=G.disabledCharms.includes(i);
+      const ch=G.charms[i];const dis=G.disabledCharms.includes(ch.id);
       const d=document.createElement('div');d.className='charm-slot';
       d.style.opacity=dis?'0.3':'1';
       d.draggable=true;d.dataset.idx=i;
@@ -1084,6 +1120,7 @@ function doRoll(){
   const keptSnapshot = [...G.kept];
   const els=document.querySelectorAll('.die');
   const ROLL_VARIANTS=['roll3d-a','roll3d-b','roll3d-c','roll3d-d'];
+  const ROLL_DURATIONS=[0.45,0.48,0.44,0.46,0.50];
   let staggerMs=0;
   for(let i=0;i<5;i++){
     if(!keptSnapshot[i]){
@@ -1091,8 +1128,9 @@ function doRoll(){
       const cube=els[i]?.querySelector('.die-cube');
       if(cube){
         const v=ROLL_VARIANTS[Math.floor(Math.random()*ROLL_VARIANTS.length)];
-        cube.style.animation=`${v} 0.42s ease-out ${staggerMs}ms both`;
-        staggerMs+=25+Math.floor(Math.random()*35);
+        const dur=ROLL_DURATIONS[i];
+        cube.style.animation=`${v} ${dur}s cubic-bezier(0.2,0.6,0.3,1) ${staggerMs}ms both`;
+        staggerMs+=30+Math.floor(Math.random()*30);
       }
     }
   }
@@ -1100,7 +1138,7 @@ function doRoll(){
     for(let i=0;i<5;i++)if(!keptSnapshot[i])G.dice[i]=rollDie(i);
     handlePostRoll();
     G.hasRolled=true;G.animating=false;render();
-  },620);
+  },700);
 }
 
 // Discards removed
@@ -1127,9 +1165,9 @@ async function doScore(categoryId){
   playSound('mult');
   xEl.textContent='\u00d7';multEl.textContent=fmt(result.mult);multEl.style.animation='multAdd 0.4s ease-out';
   await sleep(400);
-  if(result.total>500)playSound('bigScore');
+  if(result.total>250)playSound('bigScore');
   eqEl.textContent='=';resultEl.textContent=fmt(result.total);resultEl.style.animation='scorePop 0.7s ease-out';
-  if(result.total>500)screenShake();
+  if(result.total>250)screenShake();
   await sleep(700);
   G.cumulativeScore+=result.total;G.handsUsed++;G.hands--;
   G.lastScoredCategory=categoryId;
@@ -1142,7 +1180,7 @@ async function doScore(categoryId){
   G.charms.forEach(ch=>{if(ch.id==='herd_instinct'&&['three_kind','four_kind','yahtzee'].includes(categoryId))ch.accumulated=(ch.accumulated||0)+1});
   G.charms.forEach(ch=>{if(ch.id==='wanderlust'&&['small_straight','large_straight'].includes(categoryId))ch.accumulated=(ch.accumulated||0)+2});
   // Momentum tracking
-  G.charms.forEach(ch=>{if(ch.id==='momentum'){if(result.total>=200)ch._streak=(ch._streak||0)+1;else ch._streak=0}});
+  G.charms.forEach(ch=>{if(ch.id==='momentum'){if(result.total>=100)ch._streak=(ch._streak||0)+1;else ch._streak=0}});
   G.charms.forEach(ch=>{if(ch.id==='recycler'&&G.rerollCount>=G.maxRerolls)ch.accumulated=(ch.accumulated||0)+1});
   G.charms.forEach(ch=>{if(ch.id==='overkill'&&result.total>=G.targetScore*2)G.gold+=5});
   // Second Wind: if hand scored 0, get a hand back
@@ -1151,7 +1189,7 @@ async function doScore(categoryId){
   G.charms.forEach(ch=>{if(ch.id==='all_in'&&G.hands>0){}});
   for(let i=0;i<5;i++)if(G.mods[i]==='cursed'&&G.dice[i]===1)G.hands=Math.max(0,G.hands-1);
   const enemy=getEnemy();
-  if(enemy.effect==='flame_keeper')G.targetScore+=50;
+  if(enemy.effect==='flame_keeper')G.targetScore+=25;
   if(enemy.effect==='gloomjaw'&&G.catUsedThisEncounter.length>0){
     let low=G.catUsedThisEncounter.reduce((a,b)=>a.score<b.score?a:b);
     if(!G.disabledCategories.includes(low.id))G.disabledCategories.push(low.id);
@@ -1194,6 +1232,7 @@ function startEncounter(){
   G.turnBonusChips=0;G.turnBonusMult=0;
   G.kept=[false,false,false,false,false];G.hidden=[false,false,false,false,false];
   G.phased=-1;G.flameKeeperBonus=0;G.shopRerollCost=3;
+  G.bossDebuffNum=-1;G.bossBannedNums=[];G.bossDevoured=[];
   G.charms.forEach(ch=>{if(ch.id==='fate_bender')ch.usedThisEncounter=false});
   G.charms.forEach(ch=>{if(ch.id==='chrono_die')G.rerolls++});
   G.charms.forEach(ch=>{if(ch.id==='reroll_addict')G.rerolls++});
@@ -1209,7 +1248,7 @@ function startEncounter(){
   if(e.effect==='fungal_shaman')G.disabledCategories.push('chance');
   if(e.effect==='void_flickerer')G.phased=rng(0,4);
   if(e.effect==='obsidian_warden')G.hands=Math.max(1,G.hands-1);
-  if(e.effect==='shardcaster'&&G.charms.length>0)G.disabledCharms.push(rng(0,G.charms.length-1));
+  if(e.effect==='shardcaster'&&G.charms.length>0)G.disabledCharms.push(G.charms[rng(0,G.charms.length-1)].id);
   if(e.effect==='rune_breaker'){let ml=0,mc=null;Object.entries(G.catLevels).forEach(([id,l])=>{if(l>ml){ml=l;mc=id}});if(mc&&ml>0)G.catLevels[mc]--}
   if(G.dicePolishNext){const pi=rng(0,4);G.dice[pi]=6;G.kept[pi]=true;G.dicePolishNext=false}
   G.charms.forEach(ch=>{
@@ -1234,6 +1273,14 @@ function encounterWon(){
     if(ch.id==='piggy_bank'){ch.accumulated=(ch.accumulated||0)+1;pay+=1;breakdown.push({label:`Piggy Bank (+$1, total $${ch.accumulated})`,amount:1})}
     if(ch.id==='treasure_hunter')ch.accumulated=(ch.accumulated||0)+3;
     if(ch.id==='war_drum')ch.accumulated=(ch.accumulated||0)+1;
+    // Blessing-granting charms
+    if(ch.id==='scholar'&&G.catUsedThisEncounter.length>0){
+      const usage={};G.catUsedThisEncounter.forEach(u=>usage[u.id]=(usage[u.id]||0)+1);
+      let bestCat=null,bestCount=0;for(const[id,c]of Object.entries(usage)){if(c>bestCount){bestCount=c;bestCat=id}}
+      if(bestCat){G.catLevels[bestCat]=(G.catLevels[bestCat]||0)+1;breakdown.push({label:`Scholar: +1 ${getCatDef(bestCat).name} level`,amount:0})}
+    }
+    if(ch.id==='ancient_tome'){ch.accumulated=(ch.accumulated||0)+1;if(ch.accumulated%3===0){const cats=CATEGORIES.map(c=>c.id);const rc=cats[rng(0,cats.length-1)];G.catLevels[rc]=(G.catLevels[rc]||0)+1;breakdown.push({label:`Ancient Tome: +1 ${getCatDef(rc).name} level`,amount:0})}}
+    if(ch.id==='temple_pilgrim'&&isBoss()){for(let j=0;j<2;j++){const cats=CATEGORIES.map(c=>c.id);const rc=cats[rng(0,cats.length-1)];G.catLevels[rc]=(G.catLevels[rc]||0)+1}breakdown.push({label:'Temple Pilgrim: +2 random levels',amount:0})}
   });
   G.gold+=pay;
   G._lastPayBreakdown=breakdown;G._lastPayTotal=pay;
@@ -1287,7 +1334,7 @@ function showBonuses(){
     html+=`<div style="color:#6858a0;font-size:12px;padding:10px">No charms equipped</div>`;
   }else{
     G.charms.forEach((ch,i)=>{
-      const disabled=G.disabledCharms.includes(i);
+      const disabled=G.disabledCharms.includes(ch.id);
       let bonusText='';
       if(ch.chips)bonusText+=`<span style="color:#6fbbff">+${ch.chips} chips</span> `;
       if(ch.mult)bonusText+=`<span style="color:#ff6b6b">+${ch.mult} mult</span> `;
