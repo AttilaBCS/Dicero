@@ -923,6 +923,8 @@ function scoreHand(categoryId){
 // ============================================================
 function render(){renderDice();renderCharms();renderCategories();renderHUD();renderActions();renderConsumables()}
 
+let _prevKept=[false,false,false,false,false];
+let _justRolled=[false,false,false,false,false];
 function renderDice(){
   const area=document.getElementById('dice-area');area.innerHTML='';
   const modColors={weighted:'#d4a520',lucky:'#40e060',steel:'#90a8c0',gilded:'#ffd700',void:'#a050e0',wild:'#ff60ff',cursed:'#e03030',mirrored:'#50c0e8'};
@@ -935,6 +937,11 @@ function renderDice(){
     {cls:'face-top',  val:2},
     {cls:'face-bottom',val:5},
   ];
+  // Build set of die values targeted by active charms
+  const charmTargets=new Set();
+  const numMap={ace_devotion:1,twin_fangs:2,trinity:3,quad_core:4,high_five:5,sixth_sense:6,warm_ember:1,obsidian_shard:6};
+  G.charms.forEach(ch=>{if(!G.disabledCharms.includes(ch.id)&&numMap[ch.id]!==undefined)charmTargets.add(numMap[ch.id])});
+
   for(let i=0;i<5;i++){
     const div=document.createElement('div');
     let cls='die';
@@ -945,6 +952,7 @@ function renderDice(){
     div.className=cls;
     const displayVal=G.dice[i]||1;
     const dotVal=Math.min(getDieValue(i)||displayVal,7);
+    if(G.hasRolled&&charmTargets.has(G.dice[i]))div.classList.add('charm-boosted');
 
     // Build 3D cube
     const scene=document.createElement('div');
@@ -972,9 +980,17 @@ function renderDice(){
       label.textContent=G.mods[i];
       div.appendChild(label);
     }
+    // If die was already kept, skip the bounce-in animation
+    if(G.kept[i]&&_prevKept[i]){
+      div.style.animation='keepGlow 2s ease-in-out infinite';
+      div.style.transform='translateY(-16px) scale(1.04)';
+    }
+    if(_justRolled[i])div.classList.add('roll-settle');
     div.addEventListener('click',()=>toggleKeep(i));
     area.appendChild(div);
   }
+  _justRolled=[false,false,false,false,false];
+  _prevKept=G.kept.map(k=>!!k);
 }
 
 let _dragCharmIdx=null;
@@ -1116,28 +1132,100 @@ function doRoll(){
   }
   playSound('roll');
   G.animating=true;
-  // Capture kept state at roll time to prevent race conditions
   const keptSnapshot = [...G.kept];
   const els=document.querySelectorAll('.die');
-  const ROLL_VARIANTS=['roll3d-a','roll3d-b','roll3d-c','roll3d-d'];
   const ROLL_DURATIONS=[0.45,0.48,0.44,0.46,0.50];
-  let staggerMs=0;
+  const keptValues=G.dice.map((v,i)=>keptSnapshot[i]?v:null);
+
+  // Determine new values before animating so the roll lands on the correct face
+  const newValues=[];
   for(let i=0;i<5;i++){
-    if(!keptSnapshot[i]){
-      els[i]?.classList.add('rolling');
-      const cube=els[i]?.querySelector('.die-cube');
-      if(cube){
-        const v=ROLL_VARIANTS[Math.floor(Math.random()*ROLL_VARIANTS.length)];
-        const dur=ROLL_DURATIONS[i];
-        cube.style.animation=`${v} ${dur}s cubic-bezier(0.2,0.6,0.3,1) ${staggerMs}ms both`;
-        staggerMs+=30+Math.floor(Math.random()*30);
-      }
+    if(keptSnapshot[i]){newValues.push(keptValues[i]);continue;}
+    newValues.push(rollDie(i));
+  }
+
+  // Parse target rotation for each die value
+  function parseRot(val){
+    const s=CUBE_ROTATIONS[val]||CUBE_ROTATIONS[1];
+    const rx=(s.match(/rotateX\(([^)]+)\)/)||[])[1]||'0deg';
+    const ry=(s.match(/rotateY\(([^)]+)\)/)||[])[1]||'0deg';
+    return{rx:parseFloat(rx),ry:parseFloat(ry)};
+  }
+
+  let staggerMs=0;
+  // Remove old dynamic roll keyframes
+  document.querySelectorAll('style[data-roll-kf]').forEach(s=>s.remove());
+
+  for(let i=0;i<5;i++){
+    if(keptSnapshot[i])continue;
+    els[i]?.classList.add('rolling');
+    const cube=els[i]?.querySelector('.die-cube');
+    if(cube){
+      // Start from current face rotation
+      const currentVal=Math.min(getDieValue(i)||G.dice[i]||1,7);
+      const start=parseRot(currentVal);
+      const target=parseRot(Math.min(newValues[i],7));
+      // Add extra full spins so the roll looks energetic
+      const spinsX=2+Math.floor(Math.random()*2);
+      const spinsY=1+Math.floor(Math.random()*2);
+      const dirX=Math.random()>0.5?1:-1;
+      const dirY=Math.random()>0.5?1:-1;
+      const endRx=target.rx+spinsX*360*dirX;
+      const endRy=target.ry+spinsY*360*dirY;
+      // Intermediate points relative to start→end travel
+      const dRx=endRx-start.rx, dRy=endRy-start.ry;
+      const name=`roll-land-${i}-${Date.now()}`;
+      const style=document.createElement('style');
+      style.setAttribute('data-roll-kf','');
+      style.textContent=`@keyframes ${name}{`+
+        `0%{transform:rotateX(${start.rx}deg) rotateY(${start.ry}deg) scale(1)}`+
+        `25%{transform:rotateX(${start.rx+dRx*0.3}deg) rotateY(${start.ry+dRy*0.3}deg) scale(0.9)}`+
+        `55%{transform:rotateX(${start.rx+dRx*0.6}deg) rotateY(${start.ry+dRy*0.6}deg) scale(1.05)}`+
+        `85%{transform:rotateX(${start.rx+dRx*0.93}deg) rotateY(${start.ry+dRy*0.93}deg) scale(0.98)}`+
+        `100%{transform:rotateX(${endRx}deg) rotateY(${endRy}deg) scale(1)}`+
+      `}`;
+      document.head.appendChild(style);
+      const dur=ROLL_DURATIONS[i];
+      cube.style.animation=`${name} ${dur}s cubic-bezier(0.2,0.6,0.3,1) ${staggerMs}ms both`;
+      staggerMs+=30+Math.floor(Math.random()*30);
     }
   }
   setTimeout(()=>{
-    for(let i=0;i<5;i++)if(!keptSnapshot[i])G.dice[i]=rollDie(i);
+    // Commit pre-decided values
+    for(let i=0;i<5;i++){
+      if(keptSnapshot[i])G.dice[i]=keptValues[i];
+      else G.dice[i]=newValues[i];
+    }
     handlePostRoll();
-    G.hasRolled=true;G.animating=false;render();
+    G.hasRolled=true;G.animating=false;
+
+    // Settle dice in-place instead of rebuilding DOM (no flash)
+    const settled=document.querySelectorAll('.die');
+    for(let i=0;i<5;i++){
+      if(keptSnapshot[i]||!settled[i])continue;
+      const cube=settled[i].querySelector('.die-cube');
+      if(cube){
+        // Compute the normalized target matching end of animation
+        const dotVal=Math.min(getDieValue(i)||G.dice[i],7);
+        const finalTransform=CUBE_ROTATIONS[dotVal]||CUBE_ROTATIONS[1];
+        // Freeze at current animated position, then swap to canonical rotation
+        const computed=getComputedStyle(cube).transform;
+        cube.style.animation='none';
+        cube.style.transform=computed; // hold current matrix (prevents flash)
+        // Force reflow so the browser commits the matrix
+        cube.offsetHeight;
+        // Swap to canonical rotation (same visual orientation, no flash)
+        cube.style.transform=finalTransform;
+        // Rebuild front face dots to show correct value
+        const front=cube.querySelector('.face-front');
+        if(front)front.innerHTML=createDieDots(dotVal);
+      }
+      settled[i].classList.remove('rolling','unrolled');
+      settled[i].classList.add('roll-settle');
+    }
+    _justRolled=keptSnapshot.map(k=>!k);
+    // Render everything except dice
+    renderCharms();renderCategories();renderHUD();renderActions();renderConsumables();
   },700);
 }
 
@@ -1298,7 +1386,7 @@ function encounterLost(){
 // OVERLAYS
 // ============================================================
 function showOverlay(html){document.getElementById('overlay-content').innerHTML=html;document.getElementById('overlay').classList.add('active')}
-function closeOverlay(){document.getElementById('overlay').classList.remove('active')}
+function closeOverlay(){document.getElementById('overlay').classList.remove('active');resetOverlayStyles()}
 
 function showBonuses(){
   let html=`<div style="max-width:600px;margin:0 auto">
@@ -1390,30 +1478,95 @@ function showBonuses(){
 
 function showTitleScreen(){
   G.phase='title';
-  showOverlay(`
-    <div class="title text-center">
-      <div style="font-size:60px;margin-bottom:8px;animation:float 3s ease-in-out infinite">\u{1F3B2}</div>
-      <h1>DICERO</h1>
-      <p class="sub">A roguelike dice-builder</p>
-      <p style="color:#6858a0;font-size:13px;max-width:420px;margin:0 auto 24px;line-height:1.6">
-        Roll ancient dice. Build devastating combos.<br>Collect Charms of power. Conquer five Trials.
-      </p>
-      <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="startRun()" style="font-size:20px;padding:16px 48px;letter-spacing:2px">BEGIN RUN</button>
-        <button class="btn" onclick="showInfoPage()" style="font-size:16px;padding:14px 32px;letter-spacing:1px">COMPENDIUM</button>
+  document.getElementById('overlay').classList.add('active');
+  const oc=document.getElementById('overlay-content');
+  oc.style.padding='0';
+  oc.style.background='transparent';
+  oc.style.border='none';
+  oc.style.boxShadow='none';
+  oc.style.maxWidth='100%';
+  oc.style.width='100%';
+  oc.style.maxHeight='100%';
+  oc.style.overflow='hidden';
+  oc.style.animation='none';
+  // Build a 3D die for the title using the same structure as in-game
+  const dieFaces=[
+    {cls:'face-front',val:1},{cls:'face-back',val:6},
+    {cls:'face-right',val:3},{cls:'face-left',val:4},
+    {cls:'face-top',val:2},{cls:'face-bottom',val:5}
+  ];
+  let dieFacesHTML='';
+  dieFaces.forEach(f=>{
+    dieFacesHTML+=`<div class="die-face ${f.cls}">${createDieDots(f.val)}</div>`;
+  });
+  oc.innerHTML=`
+    <div class="title-splash">
+      <div class="title-die-wrap">
+        <div class="sigil-ring sigil-ring-outer"></div>
+        <div class="sigil-ring sigil-ring-inner"></div>
+        <div class="title-die">
+          <div class="die-3d-scene">
+            <div class="die-cube title-die-cube">${dieFacesHTML}</div>
+          </div>
+        </div>
       </div>
-      <div style="margin-top:28px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;background:rgba(15,12,30,0.5);padding:16px 20px;border-radius:12px;border:1px solid rgba(120,80,200,0.15)">
-        <h3 style="color:#a090c0;margin:0 0 10px;font-size:13px;letter-spacing:1.5px">HOW TO PLAY</h3>
-        <ul style="font-size:12px;color:#8070b0;line-height:2;padding-left:18px">
-          <li><b style="color:#c0b0e0">Roll</b> 5 dice, then <b style="color:#c0b0e0">click dice</b> to keep them</li>
-          <li><b style="color:#c0b0e0">Reroll</b> unkept dice (3 rerolls per hand)</li>
-          <li>Click a <b style="color:#c0b0e0">scoring category</b> on the right to score</li>
+      <h1 class="title-logo">DICERO</h1>
+      <p class="title-tagline">A roguelike dice-builder</p>
+      <p class="title-flavor">Roll ancient dice. Build devastating combos.<br>Collect Charms of power. Conquer five Trials.</p>
+      <div class="title-buttons">
+        <button class="btn btn-primary title-begin" onclick="showRulesScreen()">BEGIN RUN</button>
+        <button class="btn title-comp" onclick="showInfoPage()">COMPENDIUM</button>
+      </div>
+      <div class="title-particles" id="title-particles"></div>
+    </div>
+  `;
+  // Spawn floating particles
+  const pc=document.getElementById('title-particles');
+  for(let i=0;i<20;i++){
+    const p=document.createElement('div');
+    p.className='title-particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDelay=Math.random()*6+'s';
+    p.style.animationDuration=(4+Math.random()*4)+'s';
+    p.style.opacity=0.2+Math.random()*0.4;
+    p.style.width=p.style.height=(2+Math.random()*3)+'px';
+    pc.appendChild(p);
+  }
+}
+
+function showRulesScreen(){
+  playSound('click');
+  const oc=document.getElementById('overlay-content');
+  // Reset overlay-content styles for normal overlay
+  oc.style.padding='';
+  oc.style.background='';
+  oc.style.border='';
+  oc.style.boxShadow='';
+  oc.style.maxWidth='';
+  oc.style.width='';
+  oc.style.maxHeight='';
+  oc.style.overflow='';
+  oc.style.animation='';
+  oc.innerHTML=`
+    <div class="title text-center">
+      <h2 style="margin-bottom:16px;font-size:26px">HOW TO PLAY</h2>
+      <div style="text-align:left;max-width:460px;margin:0 auto 24px">
+        <ul style="font-size:13px;color:#a090c0;line-height:2.2;padding-left:20px">
+          <li><b style="color:#e0d0f0">Roll</b> 5 dice, then <b style="color:#e0d0f0">click dice</b> to keep them</li>
+          <li><b style="color:#e0d0f0">Reroll</b> unkept dice (3 rerolls per hand)</li>
+          <li>Click a <b style="color:#e0d0f0">scoring category</b> on the right to score</li>
           <li>Score = <span style="color:#6fbbff">Chips</span> \u00d7 <span style="color:#ff6b6b">Mult</span></li>
-          <li>Visit the <b style="color:#ffd700">Shop</b> to buy Charms between fights</li>
+          <li>Visit the <b style="color:#ffd700">Shop</b> between fights to buy <b style="color:#e0d0f0">Charms</b></li>
+          <li>Defeat <b style="color:#e8a0a0">4 enemies + 1 boss</b> per Trial</li>
+          <li>Survive all <b style="color:#e8d080">5 Trials</b> to win</li>
         </ul>
       </div>
+      <div style="display:flex;gap:14px;justify-content:center">
+        <button class="btn" onclick="showTitleScreen()" style="padding:12px 32px;font-size:14px">BACK</button>
+        <button class="btn btn-primary" onclick="startRun()" style="font-size:18px;padding:14px 48px;letter-spacing:2px">START</button>
+      </div>
     </div>
-  `);
+  `;
 }
 
 function showInfoPage(){
@@ -1563,8 +1716,16 @@ window.switchInfoTab=function(tab,btn){
 
 function startRun(){
   playSound('click');
+  resetOverlayStyles();
   newRun();closeOverlay();
   offerCharmPick('Choose a Starting Charm',getRandomCharms('common',3),()=>startEncounter());
+}
+
+function resetOverlayStyles(){
+  const oc=document.getElementById('overlay-content');
+  oc.style.padding='';oc.style.background='';oc.style.border='';
+  oc.style.boxShadow='';oc.style.maxWidth='';oc.style.width='';
+  oc.style.maxHeight='';oc.style.overflow='';oc.style.animation='';
 }
 
 function getRandomCharms(rarity,count){
@@ -1573,16 +1734,17 @@ function getRandomCharms(rarity,count){
 }
 
 function offerCharmPick(title,choices,onDone){
-  let html=`<h2>${title}</h2><div class="pick-row">`;
+  let html=`<h2 style="font-size:20px;margin-bottom:8px">${title}</h2><div class="pick-row">`;
   choices.forEach((ch,i)=>{
     html+=`<div class="pick-card" onclick="pickCharm(${i})">
-      <div style="font-size:40px;margin-bottom:6px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5))">${ch.icon||'?'}</div>
+      <div style="font-size:28px;margin-bottom:2px;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.5))">${ch.icon||'?'}</div>
       <span class="charm-rarity rarity-${ch.rarity}">${ch.rarity}</span>
-      <div style="font-size:17px;font-weight:700;color:#d0c0e8;margin:10px 0;letter-spacing:0.5px">${ch.name}</div>
-      <div style="font-size:12px;color:#8878a8;line-height:1.4">${ch.desc}</div>
+      <div style="font-size:14px;font-weight:700;color:#d0c0e8;margin:4px 0;letter-spacing:0.5px">${ch.name}</div>
+      <div style="font-size:11px;color:#8878a8;line-height:1.3">${ch.desc}</div>
     </div>`;
   });
   html+='</div>';showOverlay(html);
+  document.getElementById('overlay-content').style.padding='16px 24px';
   window._pickChoices=choices;window._pickCallback=onDone;
 }
 window.pickCharm=function(i){playSound('charm');const ch=window._pickChoices[i];if(G.charms.length<G.maxCharmSlots)G.charms.push({...ch});closeOverlay();window._pickCallback()};
@@ -1623,29 +1785,29 @@ function renderShop(){
     html+=`</div>`;
   }
 
-  html+=`<h3>Charms</h3><div class="shop-row">`;
+  html+=`<div class="shop-row" style="margin-bottom:8px">`;
   ch.forEach((c,i)=>{
     const dc=shopDiscount(c.cost);
     const can=G.gold>=dc&&G.charms.length<G.maxCharmSlots&&!sold['c'+i];
     html+=`<div class="shop-card ${can?'':'disabled'} ${sold['c'+i]?'sold':''}" onclick="${can?`buyShopCharm(${i})`:''}"><div class="shop-icon">${c.icon||'?'}</div><span class="charm-rarity rarity-${c.rarity}">${c.rarity}</span><div class="shop-name">${c.name}</div><div class="shop-cost">$${dc}${dc<c.cost?' <s style="opacity:0.4">$'+c.cost+'</s>':''}</div><div class="shop-desc">${c.desc}</div></div>`;
   });
-  html+=`<div class="shop-card" onclick="rerollShop()" style="display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="shop-icon">\u{1F504}</div><div class="shop-name">Reroll Shop</div><div class="shop-cost">$${G.shopRerollCost}</div></div></div>`;
+  html+=`<div class="shop-card" onclick="rerollShop()" style="display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="shop-icon">\u{1F504}</div><div class="shop-name">Reroll</div><div class="shop-cost">$${G.shopRerollCost}</div></div></div>`;
 
   const canBl=G.gold>=bl.cost&&!sold.bl;
-  html+=`<h3>Blessing</h3><div class="shop-row"><div class="shop-card ${canBl?'':'disabled'} ${sold.bl?'sold':''}" onclick="${canBl?'buyShopBlessing()':''}"><div class="shop-icon">\u{1F64F}</div><div class="shop-name">${bl.name}</div><div class="shop-cost">$${bl.cost}</div><div class="shop-desc">+${blCat.chipPer} chips, +${blCat.multPer} mult to ${blCat.name}</div></div></div>`;
-
   const canEn=G.gold>=en.cost&&G.enchantments.length<G.maxEnchSlots&&!sold.en;
-  html+=`<h3>Enchantment</h3><div class="shop-row"><div class="shop-card ${canEn?'':'disabled'} ${sold.en?'sold':''}" onclick="${canEn?'buyShopEnchantment()':''}"><div class="shop-icon">\u{1F52E}</div><div class="shop-name">${en.name}</div><div class="shop-cost">$${en.cost}</div><div class="shop-desc">${en.desc}</div></div></div>`;
-
   const canSp=G.gold>=sp.cost&&!sold.sp;
-  html+=`<h3>Special</h3><div class="shop-row"><div class="shop-card ${canSp?'':'disabled'} ${sold.sp?'sold':''}" onclick="${canSp?'buyShopSpecial()':''}"><div class="shop-icon">${sp.icon}</div><div class="shop-name">${sp.name}</div><div class="shop-cost">$${sp.cost}</div><div class="shop-desc">${sp.desc}</div></div></div>`;
+  html+=`<div class="shop-row" style="margin-bottom:8px">`;
+  html+=`<div class="shop-card ${canBl?'':'disabled'} ${sold.bl?'sold':''}" onclick="${canBl?'buyShopBlessing()':''}"><div class="shop-icon">\u{1F64F}</div><div class="shop-name">${bl.name}</div><div class="shop-cost">$${bl.cost}</div><div class="shop-desc">+${blCat.chipPer} chips, +${blCat.multPer} mult to ${blCat.name}</div></div>`;
+  html+=`<div class="shop-card ${canEn?'':'disabled'} ${sold.en?'sold':''}" onclick="${canEn?'buyShopEnchantment()':''}"><div class="shop-icon">\u{1F52E}</div><div class="shop-name">${en.name}</div><div class="shop-cost">$${en.cost}</div><div class="shop-desc">${en.desc}</div></div>`;
+  html+=`<div class="shop-card ${canSp?'':'disabled'} ${sold.sp?'sold':''}" onclick="${canSp?'buyShopSpecial()':''}"><div class="shop-icon">${sp.icon}</div><div class="shop-name">${sp.name}</div><div class="shop-cost">$${sp.cost}</div><div class="shop-desc">${sp.desc}</div></div>`;
+  html+=`</div>`;
 
   if(G.charms.length>0){
-    html+=`<h3>Sell Charms</h3><div class="shop-row">`;
-    G.charms.forEach((c,i)=>{html+=`<div class="shop-card" onclick="sellCharm(${i})"><div class="shop-icon">${c.icon||'?'}</div><div class="shop-name">${c.name}</div><div class="shop-desc">${c.desc}</div><div class="shop-cost" style="color:#80e080">+$${Math.floor((c.cost||4)/2)}</div></div>`});
+    html+=`<div class="shop-row" style="margin-bottom:8px">`;
+    G.charms.forEach((c,i)=>{html+=`<div class="shop-card" onclick="sellCharm(${i})"><div class="shop-icon">${c.icon||'?'}</div><div class="shop-name">${c.name}</div><div class="shop-cost" style="color:#80e080">+$${Math.floor((c.cost||4)/2)}</div></div>`});
     html+='</div>';
   }
-  html+=`<div class="text-center mt-10"><button class="btn btn-primary" onclick="leaveShop()" style="padding:14px 42px;font-size:16px;letter-spacing:1px">CONTINUE</button></div>`;
+  html+=`<div class="text-center" style="margin-top:6px"><button class="btn btn-primary" onclick="leaveShop()" style="padding:10px 36px;font-size:15px;letter-spacing:1px">CONTINUE</button></div>`;
   showOverlay(html);
 }
 
