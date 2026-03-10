@@ -1781,7 +1781,8 @@ function showTrialPreview(onContinue){
     <div class="text-center" style="max-width:500px;margin:0 auto">
       <div style="font-size:11px;color:#a090c0;text-transform:uppercase;letter-spacing:3px;margin-bottom:8px">Trial ${G.trial+1} of 5</div>
       <h2 style="margin-bottom:4px;font-size:24px">${t.name}</h2>
-      <p style="color:#6858a0;font-size:13px;font-style:italic;margin-bottom:20px">${t.desc}</p>
+      <p style="color:#6858a0;font-size:13px;font-style:italic;margin-bottom:12px">${t.desc}</p>
+      <p style="color:#8878b0;font-size:12px;margin-bottom:20px">3 encounters then a boss fight</p>
       <div style="background:rgba(40,15,15,0.5);border:1.5px solid rgba(200,60,60,0.3);border-radius:14px;padding:18px 22px;margin-bottom:16px;text-align:left">
         <div style="font-size:10px;color:#c08080;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Boss Awaits</div>
         <div style="font-size:18px;font-weight:700;color:#e8a0a0;margin-bottom:6px;text-shadow:0 0 16px rgba(200,60,60,0.3)">${boss.name}</div>
