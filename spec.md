@@ -6,7 +6,7 @@
 
 **Theme:** Mystical / arcane. The player is a wandering sorcerer rolling ancient dice in enchanted trials. Enemies are magical creatures and corrupted spirits. Charms are artifacts of power. The dice themselves are relics of a forgotten age.
 
-**Tech:** Single-file HTML/CSS/JS browser game. No frameworks, no build step. Web Audio API for synthesized SFX. Canvas-based starfield background and fireworks effects.
+**Tech:** Single-file HTML/CSS/JS browser game. No frameworks, no build step. Web Audio API for synthesized SFX. Canvas-based starfield background and 3D dice cascade effects.
 
 ---
 
@@ -509,7 +509,7 @@ One die shows random value each reroll. Can't be kept. Visual indicates phased s
 
 - **CRT overlay:** Subtle scanlines + vignette via CSS pseudo-elements
 - **Starfield background:** Canvas-based animated particle starfield
-- **Fireworks:** Canvas particle system on boss defeats
+- **Dice Cascade:** Falling 3D dice celebration on boss defeats
 - **Font:** Chakra Petch (Google Fonts)
 
 ---

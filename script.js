@@ -312,67 +312,86 @@ function screenShake(){
 }
 
 // ============================================================
-// FIREWORKS (boss defeat)
+// DICE CASCADE (boss defeat)
 // ============================================================
-function triggerFireworks(){
-  const canvas=document.getElementById('fireworks-canvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
-  canvas.style.display='block';
+function triggerDiceCascade(){
+  // Create container for falling dice
+  let container=document.getElementById('dice-cascade');
+  if(!container){
+    container=document.createElement('div');
+    container.id='dice-cascade';
+    document.body.appendChild(container);
+  }
+  container.innerHTML='';
+  container.style.display='block';
 
-  const colors=['#ff6b6b','#ffd700','#6bffb8','#6b9fff','#ff6bff','#ffb86b','#ffffff','#ff9f43'];
-  const particles=[];
+  const diceCount=20; // Reduced for performance
 
-  function burst(x,y){
-    for(let i=0;i<120;i++){
-      const angle=Math.random()*Math.PI*2;
-      const speed=2+Math.random()*8;
-      particles.push({
-        x,y,
-        vx:Math.cos(angle)*speed,
-        vy:Math.sin(angle)*speed-2,
-        color:colors[Math.floor(Math.random()*colors.length)],
-        size:2+Math.random()*4,
-        alpha:1,
-        gravity:0.07+Math.random()*0.05,
-        decay:0.011+Math.random()*0.009,
-      });
-    }
+  // Create cascade dice with CSS animations (GPU accelerated)
+  for(let i=0;i<diceCount;i++){
+    const value=Math.floor(Math.random()*6)+1;
+    const size=55+Math.random()*30;
+    const startX=8+Math.random()*84;
+    const delay=i*150;
+    const fallDur=3.5+Math.random()*1.5;
+    const rotDur=1.5+Math.random()*1.5;
+    const swayAmt=25+Math.random()*35;
+
+    const die=document.createElement('div');
+    die.className='cascade-die';
+    const halfSize=size/2;
+
+    // Use CSS custom properties for GPU-accelerated animation
+    die.style.cssText=`
+      --fall-dur:${fallDur}s;
+      --rot-dur:${rotDur}s;
+      --delay:${delay}ms;
+      --sway:${swayAmt}px;
+      left:${startX}%;
+      width:${size}px;
+      height:${size}px;
+    `;
+
+    die.innerHTML=`
+      <div class="cascade-die-scene">
+        <div class="cascade-die-cube">
+          <div class="cascade-die-face" style="transform:translateZ(${halfSize}px)">${createCascadeDots(value,size)}</div>
+          <div class="cascade-die-face" style="transform:rotateY(180deg) translateZ(${halfSize}px)">${createCascadeDots(7-value,size)}</div>
+          <div class="cascade-die-face" style="transform:rotateY(90deg) translateZ(${halfSize}px)">${createCascadeDots(Math.ceil(Math.random()*6),size)}</div>
+          <div class="cascade-die-face" style="transform:rotateY(-90deg) translateZ(${halfSize}px)">${createCascadeDots(Math.ceil(Math.random()*6),size)}</div>
+          <div class="cascade-die-face" style="transform:rotateX(90deg) translateZ(${halfSize}px)">${createCascadeDots(Math.ceil(Math.random()*6),size)}</div>
+          <div class="cascade-die-face" style="transform:rotateX(-90deg) translateZ(${halfSize}px)">${createCascadeDots(Math.ceil(Math.random()*6),size)}</div>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(die);
   }
 
-  // Stagger bursts across the screen
-  const spots=[[0.25,0.25],[0.75,0.2],[0.5,0.15],[0.15,0.45],[0.85,0.4],[0.5,0.45],[0.3,0.12],[0.7,0.3]];
-  spots.forEach(([rx,ry],i)=>setTimeout(()=>burst(rx*canvas.width,ry*canvas.height),i*280));
+  // Clean up after animations
+  setTimeout(()=>{
+    container.innerHTML='';
+    container.style.display='none';
+  },6500);
+}
 
-  const endTime=Date.now()+4000;
-  function animate(){
-    ctx.fillStyle='rgba(0,0,0,0.13)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    for(let i=particles.length-1;i>=0;i--){
-      const p=particles[i];
-      p.x+=p.vx; p.y+=p.vy; p.vy+=p.gravity; p.vx*=0.99;
-      p.alpha-=p.decay;
-      if(p.alpha<=0){particles.splice(i,1);continue}
-      ctx.save();
-      ctx.globalAlpha=Math.max(0,p.alpha);
-      ctx.fillStyle=p.color;
-      ctx.shadowColor=p.color;
-      ctx.shadowBlur=8;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-    }
-    if(Date.now()<endTime||particles.length>0){
-      requestAnimationFrame(animate);
-    } else {
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      canvas.style.display='none';
-    }
-  }
-  animate();
+function createCascadeDots(value,size){
+  const face=DOT_FACES[value]||DOT_FACES[1];
+  const dotSize=Math.max(4,size*0.12);
+  let html='';
+  face.forEach(pos=>{
+    const [x,y]=DOT_POS[pos];
+    html+=`<div style="
+      position:absolute;
+      left:${x}%;top:${y}%;
+      width:${dotSize}px;height:${dotSize}px;
+      background:radial-gradient(circle at 30% 30%,#fff,#e0d0ff 40%,#a080c0);
+      border-radius:50%;
+      transform:translate(-50%,-50%);
+      box-shadow:0 1px 3px rgba(0,0,0,0.5);
+    "></div>`;
+  });
+  return html;
 }
 
 // ============================================================
@@ -1571,7 +1590,7 @@ function encounterWon(){
   });
   G.gold+=pay;
   G._lastPayBreakdown=breakdown;G._lastPayTotal=pay;
-  if(isBoss()){triggerFireworks();if(G.trial>=4){showVictory();return}showTrialReward()}
+  if(isBoss()){triggerDiceCascade();if(G.trial>=4){showVictory();return}showTrialReward()}
   else{G.encounter++;showShop()}
 }
 
