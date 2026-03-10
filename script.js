@@ -1720,11 +1720,43 @@ window.switchInfoTab=function(tab,btn){
   }
 };
 
+function showTrialPreview(onContinue){
+  const t=TRIALS[G.trial];
+  if(!t){onContinue();return;}
+  const boss=t.boss;
+  showOverlay(`
+    <div class="text-center" style="max-width:500px;margin:0 auto">
+      <div style="font-size:11px;color:#a090c0;text-transform:uppercase;letter-spacing:3px;margin-bottom:8px">Trial ${G.trial+1} of 5</div>
+      <h2 style="margin-bottom:4px;font-size:24px">${t.name}</h2>
+      <p style="color:#6858a0;font-size:13px;font-style:italic;margin-bottom:20px">${t.desc}</p>
+      <div style="background:rgba(40,15,15,0.5);border:1.5px solid rgba(200,60,60,0.3);border-radius:14px;padding:18px 22px;margin-bottom:16px;text-align:left">
+        <div style="font-size:10px;color:#c08080;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Boss Awaits</div>
+        <div style="font-size:18px;font-weight:700;color:#e8a0a0;margin-bottom:6px;text-shadow:0 0 16px rgba(200,60,60,0.3)">${boss.name}</div>
+        <div style="font-size:13px;color:#c09090;line-height:1.6;margin-bottom:12px">${boss.desc}</div>
+        <div style="display:flex;gap:16px;font-size:12px">
+          <span style="color:#6fbbff">Target: ${t.bossTarget.toLocaleString()}</span>
+        </div>
+      </div>
+      <div style="background:rgba(15,15,40,0.5);border:1px solid rgba(120,80,200,0.2);border-radius:10px;padding:12px 16px;margin-bottom:20px;text-align:left">
+        <div style="font-size:10px;color:#8878b0;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Enemies This Trial</div>
+        ${t.enemies.map((e,i)=>`<div style="margin-bottom:${i<t.enemies.length-1?'8':'0'}px"><span style="font-weight:700;color:#c0b0e0;font-size:13px">${e.name}</span><span style="color:#6858a0;font-size:12px;margin-left:8px">${e.desc}</span></div>`).join('')}
+      </div>
+      <button class="btn btn-primary" onclick="window._trialPreviewCb()" style="font-size:16px;padding:12px 42px;letter-spacing:1.5px">ENTER TRIAL</button>
+    </div>
+  `);
+  window._trialPreviewCb=function(){closeOverlay();onContinue()};
+}
+
+function maybeShowTrialPreview(onStart){
+  if(G.encounter===0)showTrialPreview(onStart);
+  else onStart();
+}
+
 function startRun(){
   playSound('click');
   resetOverlayStyles();
   newRun();closeOverlay();
-  offerCharmPick('Choose a Starting Charm',getRandomCharms('common',3),()=>startEncounter());
+  offerCharmPick('Choose a Starting Charm',getRandomCharms('common',3),()=>maybeShowTrialPreview(()=>startEncounter()));
 }
 
 function resetOverlayStyles(){
@@ -1770,7 +1802,7 @@ window.pickTrialReward=function(type){
   if(type==='charm'&&window._trialRewardCharm&&G.charms.length<G.maxCharmSlots)G.charms.push({...window._trialRewardCharm});
   else if(type==='blessing'){const b=window._trialRewardBlessing;G.catLevels[b.category]=(G.catLevels[b.category]||0)+1}
   else if(type==='gold')G.gold+=15;
-  closeOverlay();G.trial++;G.encounter=0;startEncounter();
+  closeOverlay();G.trial++;G.encounter=0;maybeShowTrialPreview(()=>startEncounter());
 };
 
 function shopDiscount(cost){return G.charms.some(ch=>ch.id==='merchant')?Math.max(1,cost-1):cost}
@@ -1809,8 +1841,13 @@ function renderShop(){
   html+=`</div>`;
 
   if(G.charms.length>0){
-    html+=`<div class="shop-row" style="margin-bottom:8px">`;
-    G.charms.forEach((c,i)=>{html+=`<div class="shop-card" onclick="sellCharm(${i})"><div class="shop-icon">${c.icon||'?'}</div><div class="shop-name">${c.name}</div><div class="shop-cost" style="color:#80e080">+$${Math.floor((c.cost||4)/2)}</div></div>`});
+    html+=`<div style="margin-top:4px;margin-bottom:6px;text-align:center;font-size:11px;color:#a08060;text-transform:uppercase;letter-spacing:2px">Sell Charms</div>`;
+    html+=`<div class="shop-row" style="margin-bottom:8px;flex-wrap:wrap">`;
+    G.charms.forEach((c,i)=>{
+      let sp=Math.floor((c.cost||4)/2);
+      if(c.id==='piggy_bank')sp+=(c.accumulated||0);
+      html+=`<div class="shop-card" onclick="sellCharm(${i})" style="min-width:120px"><div class="shop-icon">${c.icon||'?'}</div><span class="charm-rarity rarity-${c.rarity}" style="font-size:9px">${c.rarity}</span><div class="shop-name">${c.name}</div><div class="shop-desc">${c.desc}</div><div class="shop-cost" style="color:#80e080">Sell +$${sp}</div></div>`;
+    });
     html+='</div>';
   }
   html+=`<div class="text-center" style="margin-top:6px"><button class="btn btn-primary" onclick="leaveShop()" style="padding:10px 36px;font-size:15px;letter-spacing:1px">CONTINUE</button></div>`;
