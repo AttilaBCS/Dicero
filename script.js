@@ -1099,14 +1099,24 @@ function renderActions(){
 
 function renderConsumables(){
   const bar=document.getElementById('consumables');bar.innerHTML='';
-  G.enchantments.forEach((e,i)=>{const d=document.createElement('div');d.className='consumable';d.textContent=e.name;d.title=e.desc;d.addEventListener('click',()=>useEnchantment(i));bar.appendChild(d)});
-  G.blessings.forEach((b,i)=>{const d=document.createElement('div');d.className='consumable';d.textContent=b.name;d.title=`Level up ${getCatDef(b.category).name}`;d.addEventListener('click',()=>useBlessing(i));bar.appendChild(d)});
+  G.enchantments.forEach((e,i)=>{
+    const d=document.createElement('div');d.className='consumable';
+    d.innerHTML=`<div class="consumable-name">${e.name}</div><div class="consumable-desc">${e.desc}</div><div class="consumable-hint">Click to apply to a die</div>`;
+    d.addEventListener('click',()=>useEnchantment(i));bar.appendChild(d);
+  });
+  G.blessings.forEach((b,i)=>{
+    const d=document.createElement('div');d.className='consumable';
+    const cat=getCatDef(b.category);
+    d.innerHTML=`<div class="consumable-name">${b.name}</div><div class="consumable-desc">Level up ${cat.name}</div>`;
+    d.addEventListener('click',()=>useBlessing(i));bar.appendChild(d);
+  });
 }
 
 // ============================================================
 // GAME ACTIONS
 // ============================================================
 function toggleKeep(i){
+  if(handleDieSelect(i))return;
   if(G.phase!=='rolling'||!G.hasRolled||G.animating)return;
   const e=getEnemy();
   if(e.effect==='molten_sentinel'&&G.dice[i]===6)return;
@@ -1300,15 +1310,58 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
 function useFateBender(){
   const fb=G.charms.find(ch=>ch.id==='fate_bender');if(!fb||fb.usedThisEncounter)return;
-  const val=prompt('Set which die (1-5) to what value (1-6)? Format: die,value');if(!val)return;
-  const p=val.split(',').map(Number);if(p.length!==2||p[0]<1||p[0]>5||p[1]<1||p[1]>6)return;
-  G.dice[p[0]-1]=p[1];fb.usedThisEncounter=true;render();
+  enterDieSelectMode('Click a die to set its value',(i)=>{
+    const val=parseInt(prompt('Set to what value? (1-6)'));
+    if(val>=1&&val<=6){G.dice[i]=val;fb.usedThisEncounter=true;render();}
+  });
 }
+// Die-selection mode for enchantments
+let _dieSelectMode=null; // {label, callback} or null
+
+function enterDieSelectMode(label,callback){
+  _dieSelectMode={label,callback};
+  // Highlight dice as selectable
+  document.querySelectorAll('.die').forEach((el,i)=>{
+    el.classList.add('die-selectable');
+  });
+  // Show instruction banner
+  let banner=document.getElementById('die-select-banner');
+  if(!banner){
+    banner=document.createElement('div');
+    banner.id='die-select-banner';
+    document.getElementById('center').appendChild(banner);
+  }
+  banner.innerHTML=`<span>${label}</span><button class="btn btn-small" onclick="cancelDieSelect()" style="margin-left:12px;padding:4px 12px;font-size:10px">Cancel</button>`;
+  banner.style.display='flex';
+}
+
+function cancelDieSelect(){
+  _dieSelectMode=null;
+  document.querySelectorAll('.die').forEach(el=>el.classList.remove('die-selectable'));
+  const banner=document.getElementById('die-select-banner');
+  if(banner)banner.style.display='none';
+}
+window.cancelDieSelect=cancelDieSelect;
+
+function handleDieSelect(i){
+  if(!_dieSelectMode)return false;
+  _dieSelectMode.callback(i);
+  cancelDieSelect();
+  return true;
+}
+
 function useEnchantment(idx){
   const en=G.enchantments[idx];if(!en)return;
-  if(en.mod==='remove'){const d=parseInt(prompt('Remove mod from die? (1-5)'));if(d>=1&&d<=5){G.mods[d-1]=null;G.enchantments.splice(idx,1)}}
-  else{const d=parseInt(prompt(`Apply ${en.name} to die? (1-5)`));if(d>=1&&d<=5){G.mods[d-1]=en.mod;G.enchantments.splice(idx,1)}}
-  render();
+  const label=en.mod==='remove'
+    ?'Click a die to remove its modification'
+    :`Click a die to apply <b>${en.name}</b>`;
+  enterDieSelectMode(label,(i)=>{
+    if(en.mod==='remove')G.mods[i]=null;
+    else G.mods[i]=en.mod;
+    G.enchantments.splice(idx,1);
+    playSound('charm');
+    render();
+  });
 }
 function useBlessing(idx){const b=G.blessings[idx];if(!b)return;G.catLevels[b.category]=(G.catLevels[b.category]||0)+1;G.blessings.splice(idx,1);render()}
 
