@@ -646,7 +646,7 @@ const BLESSINGS = [
 
 const SPECIALS = [
   {id:'extra_hand',name:'Extra Hand Scroll',desc:'+1 hand next encounter.',icon:'\u{1F4DC}',cost:3,effect:'extra_hand'},
-  {id:'extra_reroll',name:'Extra Reroll Scroll',desc:'+1 reroll next encounter.',icon:'\u{1F504}',cost:3,effect:'extra_reroll'},
+  {id:'extra_reroll',name:'Extra Reroll Scroll',desc:'+1 dice reroll next encounter (reroll unkept dice one extra time).',icon:'\u{1F3B2}',cost:3,effect:'extra_reroll'},
   {id:'dice_polish',name:'Dice Polish',desc:'One die starts at 6.',icon:'\u2728',cost:4,effect:'dice_polish'},
   {id:'charm_slot',name:'Charm Slot +1',desc:'Permanently +1 charm slot.',icon:'\u{1F48E}',cost:10,effect:'charm_slot'},
 ];
