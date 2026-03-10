@@ -1058,15 +1058,10 @@ body{
 }
 .cascade-die{
   position:absolute;
-  top:-100px;
   transform-style:preserve-3d;
   perspective:400px;
-  will-change:transform,opacity;
-  animation:
-    cascadeFall var(--fall-dur,4s) ease-in var(--delay,0ms) forwards,
-    cascadeSway var(--fall-dur,4s) ease-in-out var(--delay,0ms) infinite,
-    cascadeFade var(--fall-dur,4s) ease-in var(--delay,0ms) forwards;
-  filter:drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+  will-change:transform;
+  /* cMove animation set per-die via inline style */
 }
 .cascade-die-scene{
   width:100%;
@@ -1079,7 +1074,7 @@ body{
   position:relative;
   transform-style:preserve-3d;
   will-change:transform;
-  animation:cascadeSpin var(--rot-dur,2s) linear var(--delay,0ms) infinite;
+  /* spin animation set per-die via inline style */
 }
 .cascade-die-face{
   position:absolute;
@@ -1092,20 +1087,4 @@ body{
     inset 0 2px 3px rgba(255,255,255,0.12);
   backface-visibility:hidden;
 }
-@keyframes cascadeFall{
-  0%{top:-100px}
-  100%{top:110vh}
-}
-@keyframes cascadeSway{
-  0%,100%{transform:translateX(0)}
-  25%{transform:translateX(var(--sway,30px))}
-  75%{transform:translateX(calc(var(--sway,30px) * -1))}
-}
-@keyframes cascadeSpin{
-  0%{transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg)}
-  100%{transform:rotateX(360deg) rotateY(540deg) rotateZ(180deg)}
-}
-@keyframes cascadeFade{
-  0%,70%{opacity:1}
-  100%{opacity:0}
-}
+/* cascadeFall and cascadeSway replaced by per-die cMove keyframes injected by JS */

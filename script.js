@@ -314,65 +314,106 @@ function screenShake(){
 // ============================================================
 // DICE CASCADE (boss defeat)
 // ============================================================
+
+// Initialized after DOT_POS/DOT_FACES — see below
+let _cascadeDotTemplates=null;
+
+// Pre-cached dot templates using CSS var(--dot-sz) for size (optimization #9)
+function _initCascadeDotTemplates(){
+  if(_cascadeDotTemplates)return;
+  _cascadeDotTemplates={};
+  for(let v=1;v<=6;v++){
+    const face=DOT_FACES[v]||DOT_FACES[1];
+    let html='';
+    face.forEach(pos=>{
+      const[x,y]=DOT_POS[pos];
+      html+=`<div style="position:absolute;left:${x}%;top:${y}%;width:var(--dot-sz);height:var(--dot-sz);background:radial-gradient(circle at 30% 30%,#fff,#e0d0ff 40%,#a080c0);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,0.5)"></div>`;
+    });
+    _cascadeDotTemplates[v]=html;
+  }
+}
+
+let _cascadeTimer=null; // optimization #10: cancel stale cleanup
+
 function triggerDiceCascade(){
-  // Create container for falling dice
+  _initCascadeDotTemplates();
+  // Cancel any previous cleanup timer (optimization #10)
+  if(_cascadeTimer){clearTimeout(_cascadeTimer);_cascadeTimer=null;}
+  // Remove stale keyframes
+  document.querySelector('style[data-cascade-kf]')?.remove();
+
   let container=document.getElementById('dice-cascade');
   if(!container){
     container=document.createElement('div');
     container.id='dice-cascade';
     document.body.appendChild(container);
   }
-  container.innerHTML='';
   container.style.display='block';
 
-  const diceCount=20; // Reduced for performance
+  const diceCount=20;
 
-  // Create cascade dice with CSS animations (GPU accelerated)
+  // Generate all per-die keyframes in one <style> block
+  // cMove: GPU-only translateX+Y (replaces top-based cascadeFall — no layout cost)
+  //   Y keyframe stops encode gravity (slow→fast), X stops encode air resistance (fast→slow)
+  // cSpin: X+Y axes only, no Z, unique direction per die
+  const kfEl=document.createElement('style');
+  kfEl.setAttribute('data-cascade-kf','');
+  const totalY=window.innerHeight+240; // travel from top:-120px to off bottom
+  let kfText='';
+  const dieData=[];
+  for(let i=0;i<diceCount;i++){
+    const vx=((Math.random()-0.5)*280).toFixed(1);
+    const rx=(Math.random()>0.5?1:-1)*(360+Math.floor(Math.random()*3)*360);
+    const ry=(Math.random()>0.5?1:-1)*(360+Math.floor(Math.random()*3)*360);
+    // Y accelerates (gravity), X decelerates (air resistance)
+    kfText+=`@keyframes cMove${i}{`+
+      `0%{transform:translateX(0px) translateY(0px)}`+
+      `20%{transform:translateX(${(vx*0.38).toFixed(1)}px) translateY(${(totalY*0.06).toFixed(0)}px)}`+
+      `50%{transform:translateX(${(vx*0.68).toFixed(1)}px) translateY(${(totalY*0.25).toFixed(0)}px)}`+
+      `80%{transform:translateX(${(vx*0.88).toFixed(1)}px) translateY(${(totalY*0.60).toFixed(0)}px)}`+
+      `100%{transform:translateX(${vx}px) translateY(${totalY}px)}`+
+    `}`;
+    kfText+=`@keyframes cSpin${i}{0%{transform:rotateX(0deg) rotateY(0deg)}100%{transform:rotateX(${rx}deg) rotateY(${ry}deg)}}`;
+    dieData.push({rx,ry,vx});
+  }
+  kfEl.textContent=kfText;
+  document.head.appendChild(kfEl);
+
+  // Build all dice as one HTML string (optimization #8)
+  const f=v=>_cascadeDotTemplates[v]||_cascadeDotTemplates[1];
+  let html='';
+  let maxEnd=0;
   for(let i=0;i<diceCount;i++){
     const value=Math.floor(Math.random()*6)+1;
     const size=55+Math.random()*30;
-    const startX=8+Math.random()*84;
+    const halfSize=(size/2).toFixed(1);
+    const dotSz=Math.max(4,size*0.12).toFixed(1);
+    const startX=(8+Math.random()*84).toFixed(1);
     const delay=i*150;
-    const fallDur=3.5+Math.random()*1.5;
-    const rotDur=1.5+Math.random()*1.5;
-    const swayAmt=25+Math.random()*35;
+    const fallDur=(2.5+Math.random()*1.2).toFixed(2);
+    const rotDur=(0.8+Math.random()*1.2).toFixed(2);
+    const end=delay+parseFloat(fallDur)*1000;
+    if(end>maxEnd)maxEnd=end;
 
-    const die=document.createElement('div');
-    die.className='cascade-die';
-    const halfSize=size/2;
-
-    // Use CSS custom properties for GPU-accelerated animation
-    die.style.cssText=`
-      --fall-dur:${fallDur}s;
-      --rot-dur:${rotDur}s;
-      --delay:${delay}ms;
-      --sway:${swayAmt}px;
-      left:${startX}%;
-      width:${size}px;
-      height:${size}px;
-    `;
-
-    die.innerHTML=`
-      <div class="cascade-die-scene">
-        <div class="cascade-die-cube">
-          <div class="cascade-die-face" style="transform:translateZ(${halfSize}px)">${createCascadeDots(value,size)}</div>
-          <div class="cascade-die-face" style="transform:rotateY(180deg) translateZ(${halfSize}px)">${createCascadeDots(7-value,size)}</div>
-          <div class="cascade-die-face" style="transform:rotateY(90deg) translateZ(${halfSize}px)">${createCascadeDots(Math.ceil(Math.random()*6),size)}</div>
-          <div class="cascade-die-face" style="transform:rotateY(-90deg) translateZ(${halfSize}px)">${createCascadeDots(Math.ceil(Math.random()*6),size)}</div>
-          <div class="cascade-die-face" style="transform:rotateX(90deg) translateZ(${halfSize}px)">${createCascadeDots(Math.ceil(Math.random()*6),size)}</div>
-          <div class="cascade-die-face" style="transform:rotateX(-90deg) translateZ(${halfSize}px)">${createCascadeDots(Math.ceil(Math.random()*6),size)}</div>
-        </div>
-      </div>
-    `;
-
-    container.appendChild(die);
+    html+=`<div class="cascade-die" style="--dot-sz:${dotSz}px;top:-120px;left:${startX}%;width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;animation:cMove${i} ${fallDur}s linear ${delay}ms forwards">`+
+      `<div class="cascade-die-scene"><div class="cascade-die-cube" style="animation:cSpin${i} ${rotDur}s linear ${delay}ms infinite">`+
+        `<div class="cascade-die-face" style="transform:translateZ(${halfSize}px)">${f(value)}</div>`+
+        `<div class="cascade-die-face" style="transform:rotateY(180deg) translateZ(${halfSize}px)">${f(7-value)}</div>`+
+        `<div class="cascade-die-face" style="transform:rotateY(90deg) translateZ(${halfSize}px)">${f(Math.ceil(Math.random()*6))}</div>`+
+        `<div class="cascade-die-face" style="transform:rotateY(-90deg) translateZ(${halfSize}px)">${f(Math.ceil(Math.random()*6))}</div>`+
+        `<div class="cascade-die-face" style="transform:rotateX(90deg) translateZ(${halfSize}px)">${f(Math.ceil(Math.random()*6))}</div>`+
+        `<div class="cascade-die-face" style="transform:rotateX(-90deg) translateZ(${halfSize}px)">${f(Math.ceil(Math.random()*6))}</div>`+
+      `</div></div></div>`;
   }
+  container.innerHTML=html;
 
-  // Clean up after animations
-  setTimeout(()=>{
+  // Clean up only after the last die has fallen off screen (optimization #10)
+  _cascadeTimer=setTimeout(()=>{
     container.innerHTML='';
     container.style.display='none';
-  },6500);
+    kfEl.remove();
+    _cascadeTimer=null;
+  },maxEnd+200);
 }
 
 function createCascadeDots(value,size){
@@ -381,15 +422,7 @@ function createCascadeDots(value,size){
   let html='';
   face.forEach(pos=>{
     const [x,y]=DOT_POS[pos];
-    html+=`<div style="
-      position:absolute;
-      left:${x}%;top:${y}%;
-      width:${dotSize}px;height:${dotSize}px;
-      background:radial-gradient(circle at 30% 30%,#fff,#e0d0ff 40%,#a080c0);
-      border-radius:50%;
-      transform:translate(-50%,-50%);
-      box-shadow:0 1px 3px rgba(0,0,0,0.5);
-    "></div>`;
+    html+=`<div style="position:absolute;left:${x}%;top:${y}%;width:${dotSize}px;height:${dotSize}px;background:radial-gradient(circle at 30% 30%,#fff,#e0d0ff 40%,#a080c0);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,0.5)"></div>`;
   });
   return html;
 }
