@@ -1574,22 +1574,21 @@ function showInfoPage(){
   const rarityOrder=['common','uncommon','rare','legendary'];
   const rarityColors={common:'#80d080',uncommon:'#80b0ff',rare:'#ff9060',legendary:'#ffd700'};
 
-  let html=`<div style="max-width:760px;margin:0 auto">
-    <h2 style="margin-bottom:4px">Compendium</h2>
-    <p style="color:#6858a0;font-size:12px;margin-bottom:20px;text-align:center">Every upgrade you can find during a run</p>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px">
-      <button class="btn btn-small info-tab active" onclick="switchInfoTab('charms',this)">Charms</button>
-      <button class="btn btn-small info-tab" onclick="switchInfoTab('enchantments',this)">Enchantments</button>
-      <button class="btn btn-small info-tab" onclick="switchInfoTab('blessings',this)">Blessings</button>
-      <button class="btn btn-small info-tab" onclick="switchInfoTab('categories',this)">Categories</button>
-      <button class="btn btn-small info-tab" onclick="switchInfoTab('specials',this)">Specials</button>
-      <button class="btn btn-small info-tab" onclick="switchInfoTab('trials',this)">Trials</button>
+  let html=`<div style="max-width:760px;margin:0 auto;display:flex;flex-direction:column;height:80vh">
+    <div style="flex-shrink:0">
+      <h2 style="margin-bottom:4px">Compendium</h2>
+      <p style="color:#6858a0;font-size:12px;margin-bottom:12px;text-align:center">Every upgrade you can find during a run</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:12px">
+        <button class="btn btn-small info-tab active" onclick="switchInfoTab('charms',this)">Charms</button>
+        <button class="btn btn-small info-tab" onclick="switchInfoTab('enchantments',this)">Enchantments</button>
+        <button class="btn btn-small info-tab" onclick="switchInfoTab('blessings',this)">Blessings</button>
+        <button class="btn btn-small info-tab" onclick="switchInfoTab('categories',this)">Categories</button>
+        <button class="btn btn-small info-tab" onclick="switchInfoTab('specials',this)">Specials</button>
+        <button class="btn btn-small info-tab" onclick="switchInfoTab('trials',this)">Trials</button>
+      </div>
     </div>
-
-    <div id="info-content"></div>
-
-    <div class="text-center mt-10">
+    <div id="info-content" style="flex:1;overflow-y:auto;min-height:0"></div>
+    <div style="flex-shrink:0;text-align:center;padding-top:12px">
       <button class="btn btn-primary" onclick="showTitleScreen()" style="padding:12px 36px">BACK</button>
     </div>
   </div>`;
