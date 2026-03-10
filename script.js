@@ -1737,10 +1737,6 @@ function showTrialPreview(onContinue){
           <span style="color:#6fbbff">Target: ${t.bossTarget.toLocaleString()}</span>
         </div>
       </div>
-      <div style="background:rgba(15,15,40,0.5);border:1px solid rgba(120,80,200,0.2);border-radius:10px;padding:12px 16px;margin-bottom:20px;text-align:left">
-        <div style="font-size:10px;color:#8878b0;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Enemies This Trial</div>
-        ${t.enemies.map((e,i)=>`<div style="margin-bottom:${i<t.enemies.length-1?'8':'0'}px"><span style="font-weight:700;color:#c0b0e0;font-size:13px">${e.name}</span><span style="color:#6858a0;font-size:12px;margin-left:8px">${e.desc}</span></div>`).join('')}
-      </div>
       <button class="btn btn-primary" onclick="window._trialPreviewCb()" style="font-size:16px;padding:12px 42px;letter-spacing:1.5px">ENTER TRIAL</button>
     </div>
   `);
