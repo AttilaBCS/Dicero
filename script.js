@@ -322,33 +322,29 @@ function triggerFireworks(){
   canvas.height=window.innerHeight;
   canvas.style.display='block';
 
-  const colors=['#ff6b6b','#ffd700','#6bffb8','#6b9fff','#ff6bff','#ffb86b','#ffffff','#ff9f43'];
   const particles=[];
-
   function burst(x,y){
-    for(let i=0;i<120;i++){
+    for(let i=0;i<100;i++){
       const angle=Math.random()*Math.PI*2;
-      const speed=2+Math.random()*8;
+      const speed=2+Math.random()*7;
       particles.push({
         x,y,
         vx:Math.cos(angle)*speed,
         vy:Math.sin(angle)*speed-2,
-        color:colors[Math.floor(Math.random()*colors.length)],
-        size:2+Math.random()*4,
+        size:1.5+Math.random()*3,
         alpha:1,
         gravity:0.07+Math.random()*0.05,
-        decay:0.011+Math.random()*0.009,
+        decay:0.012+Math.random()*0.008,
       });
     }
   }
 
-  // Stagger bursts across the screen
-  const spots=[[0.25,0.25],[0.75,0.2],[0.5,0.15],[0.15,0.45],[0.85,0.4],[0.5,0.45],[0.3,0.12],[0.7,0.3]];
-  spots.forEach(([rx,ry],i)=>setTimeout(()=>burst(rx*canvas.width,ry*canvas.height),i*280));
+  const spots=[[0.25,0.25],[0.75,0.2],[0.5,0.12],[0.15,0.45],[0.85,0.4],[0.5,0.45],[0.3,0.12],[0.7,0.3]];
+  spots.forEach(([rx,ry],i)=>setTimeout(()=>burst(rx*canvas.width,ry*canvas.height),i*300));
 
   const endTime=Date.now()+4000;
   function animate(){
-    ctx.fillStyle='rgba(0,0,0,0.13)';
+    ctx.fillStyle='rgba(0,0,0,0.15)';
     ctx.fillRect(0,0,canvas.width,canvas.height);
     for(let i=particles.length-1;i>=0;i--){
       const p=particles[i];
@@ -357,9 +353,9 @@ function triggerFireworks(){
       if(p.alpha<=0){particles.splice(i,1);continue}
       ctx.save();
       ctx.globalAlpha=Math.max(0,p.alpha);
-      ctx.fillStyle=p.color;
-      ctx.shadowColor=p.color;
-      ctx.shadowBlur=8;
+      ctx.fillStyle='#ffffff';
+      ctx.shadowColor='#ffffff';
+      ctx.shadowBlur=6;
       ctx.beginPath();
       ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
       ctx.fill();
@@ -367,7 +363,7 @@ function triggerFireworks(){
     }
     if(Date.now()<endTime||particles.length>0){
       requestAnimationFrame(animate);
-    } else {
+    }else{
       ctx.clearRect(0,0,canvas.width,canvas.height);
       canvas.style.display='none';
     }

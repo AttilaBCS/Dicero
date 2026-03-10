@@ -457,6 +457,10 @@ body{
 /* --- FIREWORKS CANVAS --- */
 #fireworks-canvas{position:fixed;inset:0;z-index:10000;pointer-events:none;display:none}
 
+/* --- VICTORY DICE OVERLAY --- */
+#dice-victory-overlay{position:fixed;inset:0;z-index:10000;pointer-events:none;overflow:hidden}
+#dice-victory-overlay .victory-die{position:absolute}
+
 /* --- SCORE DISPLAY --- */
 #score-display{
   min-height:80px;display:flex;align-items:center;justify-content:center;gap:14px;
