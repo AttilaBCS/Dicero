@@ -1570,6 +1570,7 @@ function showRulesScreen(){
 }
 
 function showInfoPage(){
+  resetOverlayStyles();
   const rarityOrder=['common','uncommon','rare','legendary'];
   const rarityColors={common:'#80d080',uncommon:'#80b0ff',rare:'#ff9060',legendary:'#ffd700'};
 
