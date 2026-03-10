@@ -263,24 +263,29 @@ body{
 .die{
   width:92px;height:92px;
   border-radius:16px;
-  cursor:pointer;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  cursor:pointer;
+  transition:transform 0.35s cubic-bezier(0.25,0.8,0.25,1),
+             border-color 0.3s ease,
+             box-shadow 0.3s ease;
   position:relative;
   border:3px solid rgba(100,80,160,0.4);
   background:transparent;
   --die-face-bg:linear-gradient(145deg,#1c1640,#241e48,#1a1438);
   box-shadow:0 0 16px rgba(0,0,0,0.5),0 0 4px rgba(0,0,0,0.3);
   perspective:800px;
+  transform:translateY(0) scale(1);
 }
-.die:hover{
+.die:hover:not(.kept){
   border-color:rgba(180,150,240,0.7);
-  transform:scale(1.12) translateY(-4px);
+  transform:translateY(-4px) scale(1.06);
   box-shadow:0 0 28px rgba(120,80,200,0.35),0 0 8px rgba(0,0,0,0.3);
 }
 .die.kept{
   border-color:#e8d080;
   --die-face-bg:linear-gradient(145deg,#2a2250,#322a5c,#28204a);
   box-shadow:0 0 32px rgba(232,208,128,0.4),0 0 16px rgba(0,0,0,0.4);
-  animation:diceKeep 0.5s cubic-bezier(0.25,0.8,0.25,1) forwards,keepGlow 2s ease-in-out infinite 0.5s;
+  transform:translateY(-16px) scale(1.04);
+  animation:keepGlow 2s ease-in-out infinite;
 }
 .die.kept .die-cube{animation:none!important}
 .die.rolling{animation:none;border-color:transparent!important;box-shadow:none!important}

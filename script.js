@@ -923,7 +923,6 @@ function scoreHand(categoryId){
 // ============================================================
 function render(){renderDice();renderCharms();renderCategories();renderHUD();renderActions();renderConsumables()}
 
-let _prevKept=[false,false,false,false,false];
 let _justRolled=[false,false,false,false,false];
 function renderDice(){
   const area=document.getElementById('dice-area');area.innerHTML='';
@@ -980,17 +979,11 @@ function renderDice(){
       label.textContent=G.mods[i];
       div.appendChild(label);
     }
-    // If die was already kept, skip the bounce-in animation
-    if(G.kept[i]&&_prevKept[i]){
-      div.style.animation='keepGlow 2s ease-in-out infinite';
-      div.style.transform='translateY(-16px) scale(1.04)';
-    }
     if(_justRolled[i])div.classList.add('roll-settle');
     div.addEventListener('click',()=>toggleKeep(i));
     area.appendChild(div);
   }
   _justRolled=[false,false,false,false,false];
-  _prevKept=G.kept.map(k=>!!k);
 }
 
 let _dragCharmIdx=null;
@@ -1119,7 +1112,20 @@ function toggleKeep(i){
   if(e.effect==='molten_sentinel'&&G.dice[i]===6)return;
   if(e.effect==='void_flickerer'&&i===G.phased)return;
   playSound(G.kept[i]?'unkeep':'keep');
-  G.kept[i]=!G.kept[i];render();
+  G.kept[i]=!G.kept[i];
+  // Update die in-place for smooth transition (no DOM rebuild)
+  const die=document.querySelectorAll('.die')[i];
+  if(die){
+    if(G.kept[i]){
+      die.classList.add('kept');
+      die.classList.remove('roll-settle');
+      die.querySelector('.die-cube').style.animation='none';
+    }else{
+      die.classList.remove('kept');
+    }
+  }
+  // Update non-dice UI
+  renderCategories();renderHUD();renderActions();
 }
 
 function doRoll(){
