@@ -82,57 +82,52 @@ Within each Trial, enemies scale from 1× to ~2.5× the base target. Boss target
 
 ## Enemies
 
-Each enemy has a named creature with a **passive effect** that modifies gameplay for that encounter. Bosses have more severe modifiers.
+Each Trial has 3 regular enemies with no special effects, followed by a **Boss** with a unique modifier that changes gameplay.
 
 ### Trial 1: The Ember Sanctum
 
 | Enemy | Effect |
 |---|---|
-| **Cinder Imp** | No effect (introductory) |
-| **Ember Golem** | Ones count as 0 chips (combos unaffected) |
-| **Flame Keeper** | Target +25 per hand used |
-| **Molten Sentinel** | Dice showing 6 can't be kept |
-| **BOSS: Pyraxxus** | One random number debuffed to 0 chips, can't trigger Charm effects |
+| **Cinder Imp** | No effect |
+| **Ember Golem** | No effect |
+| **Flame Keeper** | No effect |
+| **BOSS: Pyraxxus** | Sixes are debuffed — those dice give 0 chips and skip Charm effects |
 
 ### Trial 2: The Hollow Depths
 
 | Enemy | Effect |
 |---|---|
-| **Spore Crawler** | After first reroll, one random kept die is rerolled |
-| **Fungal Shaman** | Chance category disabled |
-| **Crystal Lurker** | Dice can't show 6 (auto-rerolled) |
-| **Blind Burrower** | Two dice are hidden (face-down) until scored |
-| **Drowned Revenant** | Start each hand with only 2 rerolls |
+| **Spore Crawler** | No effect |
+| **Fungal Shaman** | No effect |
+| **Crystal Lurker** | No effect |
 | **BOSS: Gloomjaw** | After each hand, lowest-scoring used category is devoured (disabled) |
 
 ### Trial 3: The Shattered Spire
 
 | Enemy | Effect |
 |---|---|
-| **Gale Phantom** | After each reroll, one kept die swapped with a rerolled die |
-| **Storm Elemental** | Even dice give half chips |
-| **Skyborne Sentinel** | Must score with 3+ dice or hand = 0 |
-| **Shardcaster** | One random Charm disabled |
+| **Storm Elemental** | No effect |
+| **Skyborne Sentinel** | No effect |
+| **Shardcaster** | No effect |
 | **BOSS: Voltaryx** | Can't score same category twice in a row |
 
 ### Trial 4: The Obsidian Rift
 
 | Enemy | Effect |
 |---|---|
-| **Void Flickerer** | One die is phased — random value each reroll, can't be kept |
-| **Glass Stalker** | Three of a Kind or lower deals 10% score penalty |
-| **Rift Weaver** | All dice values inverted (1↔6, 2↔5, 3↔4) for chips |
-| **Null Prophet** | Charm mult bonuses halved |
+| **Void Flickerer** | No effect |
+| **Glass Stalker** | No effect |
+| **Null Prophet** | No effect |
 | **BOSS: Nihilex** | Two random numbers banned (0 chips, don't count for combos) |
 
 ### Trial 5: The Astral Throne
 
 | Enemy | Effect |
 |---|---|
-| **Stellar Wisp** | Rerolls cost $1 gold each |
-| **Constellation Beast** | Only full-5-dice categories get full mult; others halved |
-| **Fate Spinner** | 25% chance each kept die rerolls anyway |
-| **BOSS: Aeonax** | Three numbers banned, -1 hand, -1 reroll |
+| **Stellar Wisp** | No effect |
+| **Constellation Beast** | No effect |
+| **Fate Spinner** | No effect |
+| **BOSS: Aeonax** | Three numbers banned, -1 hand |
 
 ---
 

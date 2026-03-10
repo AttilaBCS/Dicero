@@ -439,40 +439,40 @@ const TRIALS = [
   {name:'The Ember Sanctum',desc:'A crumbling temple lit by dying embers.',base:150,bossTarget:450,
    enemies:[
      {name:'Cinder Imp',effect:'none',desc:'No effect.'},
-     {name:'Ember Golem',effect:'ember_golem',desc:'Ones count as 0 chips (still count for combos).'},
-     {name:'Flame Keeper',effect:'flame_keeper',desc:'Target +25 for each hand used.'},
+     {name:'Ember Golem',effect:'none',desc:'No effect.'},
+     {name:'Flame Keeper',effect:'none',desc:'No effect.'},
    ],
    boss:{name:'Pyraxxus, the Undying Flame',effect:'pyraxxus',desc:'Sixes are debuffed \u2014 those dice give 0 chips and skip Charm effects.'}
   },
   {name:'The Hollow Depths',desc:'Fungal caverns and flooded crypts.',base:750,bossTarget:2250,
    enemies:[
-     {name:'Spore Crawler',effect:'spore_crawler',desc:'After first reroll, one random kept die is rerolled.'},
-     {name:'Fungal Shaman',effect:'fungal_shaman',desc:'Chance category is disabled.'},
-     {name:'Crystal Lurker',effect:'crystal_lurker',desc:'Dice can\'t show 6 (auto-rerolled).'},
+     {name:'Spore Crawler',effect:'none',desc:'No effect.'},
+     {name:'Fungal Shaman',effect:'none',desc:'No effect.'},
+     {name:'Crystal Lurker',effect:'none',desc:'No effect.'},
    ],
    boss:{name:'Gloomjaw, the Depth Devourer',effect:'gloomjaw',desc:'After each hand, your lowest-scoring used category is devoured (disabled).'}
   },
   {name:'The Shattered Spire',desc:'Wind and lightning rage through fractured halls.',base:3000,bossTarget:10000,
    enemies:[
-     {name:'Storm Elemental',effect:'storm_elemental',desc:'Even-numbered dice give half chips.'},
-     {name:'Skyborne Sentinel',effect:'skyborne_sentinel',desc:'Must score with 3+ dice or hand scores 0.'},
-     {name:'Shardcaster',effect:'shardcaster',desc:'One random Charm is disabled.'},
+     {name:'Storm Elemental',effect:'none',desc:'No effect.'},
+     {name:'Skyborne Sentinel',effect:'none',desc:'No effect.'},
+     {name:'Shardcaster',effect:'none',desc:'No effect.'},
    ],
    boss:{name:'Voltaryx, the Spire\'s Crown',effect:'voltaryx',desc:'Can\'t score the same category twice in a row.'}
   },
   {name:'The Obsidian Rift',desc:'Dark glass and void energy twist the laws of chance.',base:15000,bossTarget:50000,
    enemies:[
-     {name:'Void Flickerer',effect:'void_flickerer',desc:'One die is phased \u2014 random value each reroll, can\'t be kept.'},
-     {name:'Glass Stalker',effect:'glass_stalker',desc:'Three of a Kind or lower: 10% of score is subtracted.'},
-     {name:'Null Prophet',effect:'null_prophet',desc:'Charm mult bonuses halved.'},
+     {name:'Void Flickerer',effect:'none',desc:'No effect.'},
+     {name:'Glass Stalker',effect:'none',desc:'No effect.'},
+     {name:'Null Prophet',effect:'none',desc:'No effect.'},
    ],
    boss:{name:'Nihilex, the Rift Warden',effect:'nihilex',desc:'Two random numbers can\'t be scored (0 chips, don\'t count for combos).'}
   },
   {name:'The Astral Throne',desc:'Beyond the mortal plane.',base:75000,bossTarget:250000,
    enemies:[
-     {name:'Stellar Wisp',effect:'stellar_wisp',desc:'Rerolls cost $1 each.'},
-     {name:'Constellation Beast',effect:'constellation_beast',desc:'Only full-5-dice categories get full mult; others half.'},
-     {name:'Fate Spinner',effect:'fate_spinner',desc:'25% chance each kept die rerolls anyway.'},
+     {name:'Stellar Wisp',effect:'none',desc:'No effect.'},
+     {name:'Constellation Beast',effect:'none',desc:'No effect.'},
+     {name:'Fate Spinner',effect:'none',desc:'No effect.'},
    ],
    boss:{name:'Aeonax, the Final Arbiter',effect:'aeonax',desc:'Three numbers banned. -1 hand.'}
   },
@@ -921,7 +921,140 @@ function scoreHand(categoryId){
 // ============================================================
 // RENDERING
 // ============================================================
-function render(){renderDice();renderCharms();renderCategories();renderHUD();renderActions();renderConsumables()}
+function renderActiveEffects(){
+  const container=document.getElementById('active-effects');
+  if(!container)return;
+  container.innerHTML='';
+  if(G.phase!=='rolling')return;
+  const e=getEnemy();
+
+  // Enemy effect (always show if not 'none')
+  if(e.effect!=='none'){
+    const tag=document.createElement('div');
+    tag.className=`effect-tag ${isBoss()?'boss':'enemy'}`;
+    tag.innerHTML=`<span class="effect-icon">${isBoss()?'💀':'👁️'}</span><span>${e.name}: ${e.desc}</span>`;
+    container.appendChild(tag);
+  }
+
+  // Boss-specific debuffs
+  if(e.effect==='pyraxxus'&&G.bossDebuffNum>0){
+    const tag=document.createElement('div');
+    tag.className='effect-tag debuff';
+    tag.innerHTML=`<span class="effect-icon">🚫</span><span>${G.bossDebuffNum}s give 0 chips</span>`;
+    container.appendChild(tag);
+  }
+  if(e.effect==='nihilex'&&G.bossBannedNums.length>0){
+    const tag=document.createElement('div');
+    tag.className='effect-tag debuff';
+    tag.innerHTML=`<span class="effect-icon">🚫</span><span>Banned: ${G.bossBannedNums.join(', ')}</span>`;
+    container.appendChild(tag);
+  }
+  if(e.effect==='aeonax'&&G.bossBannedNums.length>0){
+    const tag=document.createElement('div');
+    tag.className='effect-tag debuff';
+    tag.innerHTML=`<span class="effect-icon">🚫</span><span>Banned: ${G.bossBannedNums.join(', ')}</span>`;
+    container.appendChild(tag);
+  }
+  if(e.effect==='void_flickerer'&&G.phased>=0){
+    const tag=document.createElement('div');
+    tag.className='effect-tag debuff';
+    tag.innerHTML=`<span class="effect-icon">👻</span><span>Die ${G.phased+1} is phased</span>`;
+    container.appendChild(tag);
+  }
+  if(e.effect==='shardcaster'&&G.disabledCharms.length>0){
+    const disabled=G.charms.find(ch=>G.disabledCharms.includes(ch.id));
+    if(disabled){
+      const tag=document.createElement('div');
+      tag.className='effect-tag debuff';
+      tag.innerHTML=`<span class="effect-icon">🔇</span><span>${disabled.name} disabled</span>`;
+      container.appendChild(tag);
+    }
+  }
+  if(e.effect==='voltaryx'&&G.lastScoredCategory){
+    const cat=getCatDef(G.lastScoredCategory);
+    if(cat){
+      const tag=document.createElement('div');
+      tag.className='effect-tag debuff';
+      tag.innerHTML=`<span class="effect-icon">⛔</span><span>Can't repeat: ${cat.name}</span>`;
+      container.appendChild(tag);
+    }
+  }
+
+  // Disabled categories
+  G.disabledCategories.forEach(catId=>{
+    const cat=getCatDef(catId);
+    if(cat){
+      const tag=document.createElement('div');
+      tag.className='effect-tag debuff';
+      tag.innerHTML=`<span class="effect-icon">❌</span><span>${cat.name} disabled</span>`;
+      container.appendChild(tag);
+    }
+  });
+
+  // Die modifications
+  const modNames={weighted:'Weighted',lucky:'Lucky',steel:'Steel',gilded:'Gilded',void:'Void',wild:'Wild',cursed:'Cursed',mirrored:'Mirrored'};
+  const modIcons={weighted:'⚖️',lucky:'🍀',steel:'⚔️',gilded:'✨',void:'🕳️',wild:'🌈',cursed:'💀',mirrored:'🪞'};
+  for(let i=0;i<5;i++){
+    if(G.mods[i]){
+      const tag=document.createElement('div');
+      tag.className='effect-tag mod';
+      tag.innerHTML=`<span class="effect-icon">${modIcons[G.mods[i]]||'🎲'}</span><span>Die ${i+1}: ${modNames[G.mods[i]]||G.mods[i]}</span>`;
+      container.appendChild(tag);
+    }
+  }
+
+  // Active scaling charm effects
+  G.charms.forEach(ch=>{
+    if(G.disabledCharms.includes(ch.id))return;
+    if(ch.accumulated&&ch.accumulated>0){
+      const tag=document.createElement('div');
+      tag.className='effect-tag charm';
+      tag.innerHTML=`<span class="effect-icon">${ch.icon||'✨'}</span><span>${ch.name}: +${ch.accumulated} ${ch.scaleStat||'bonus'}</span>`;
+      container.appendChild(tag);
+    }
+    // Show important passive effects
+    if(ch.id==='blood_pact'){
+      const tag=document.createElement('div');
+      tag.className='effect-tag charm';
+      tag.innerHTML=`<span class="effect-icon">🩸</span><span>Blood Pact: +5 mult, -1 hand</span>`;
+      container.appendChild(tag);
+    }
+    if(ch.id==='reroll_addict'){
+      const tag=document.createElement('div');
+      tag.className='effect-tag buff';
+      tag.innerHTML=`<span class="effect-icon">🎡</span><span>+1 reroll/encounter</span>`;
+      container.appendChild(tag);
+    }
+    if(ch.id==='chrono_die'){
+      const tag=document.createElement('div');
+      tag.className='effect-tag buff';
+      tag.innerHTML=`<span class="effect-icon">⏳</span><span>+1 reroll/encounter</span>`;
+      container.appendChild(tag);
+    }
+    if(ch.id==='the_first_die'){
+      const tag=document.createElement('div');
+      tag.className='effect-tag buff';
+      tag.innerHTML=`<span class="effect-icon">💠</span><span>All dice +1</span>`;
+      container.appendChild(tag);
+    }
+  });
+
+  // Extra hand/reroll from scrolls
+  if(G.extraHandNext>0){
+    const tag=document.createElement('div');
+    tag.className='effect-tag buff';
+    tag.innerHTML=`<span class="effect-icon">📜</span><span>+${G.extraHandNext} hand this encounter</span>`;
+    container.appendChild(tag);
+  }
+  if(G.extraRerollNext>0){
+    const tag=document.createElement('div');
+    tag.className='effect-tag buff';
+    tag.innerHTML=`<span class="effect-icon">🎲</span><span>+${G.extraRerollNext} reroll this encounter</span>`;
+    container.appendChild(tag);
+  }
+}
+
+function render(){renderActiveEffects();renderDice();renderCharms();renderCategories();renderHUD();renderActions();renderConsumables()}
 
 let _justRolled=[false,false,false,false,false];
 function renderDice(){
@@ -1077,8 +1210,8 @@ function renderHUD(){
   document.getElementById('hud-encounter').textContent=G.encounter+1;
   document.getElementById('score-fill').style.width=clamp(G.cumulativeScore/G.targetScore*100,0,100)+'%';
   const e=getEnemy();
-  document.getElementById('enemy-name').textContent=isBoss()?e.name:'';
-  document.getElementById('enemy-effect').textContent=isBoss()?e.desc:'';
+  document.getElementById('enemy-name').textContent=e.name||'';
+  document.getElementById('enemy-effect').textContent='';
   document.getElementById('game').classList.toggle('boss-encounter',isBoss());
   if(!G.animating){['score-chips','score-mult','score-result'].forEach(id=>document.getElementById(id).textContent='');document.querySelector('.score-x').textContent='';document.querySelector('.score-eq').textContent=''}
 }
@@ -1135,7 +1268,7 @@ function toggleKeep(i){
     }
   }
   // Update non-dice UI
-  renderCategories();renderHUD();renderActions();
+  renderActiveEffects();renderCategories();renderHUD();renderActions();
 }
 
 function doRoll(){
@@ -1218,7 +1351,10 @@ function doRoll(){
     // Settle dice in-place instead of rebuilding DOM (no flash)
     const settled=document.querySelectorAll('.die');
     for(let i=0;i<5;i++){
-      if(keptSnapshot[i]||!settled[i])continue;
+      // Skip kept dice unless handlePostRoll modified them
+      const wasKept=keptSnapshot[i];
+      const wasModifiedByPostRoll=wasKept&&G.dice[i]!==keptValues[i];
+      if((wasKept&&!wasModifiedByPostRoll)||!settled[i])continue;
       const cube=settled[i].querySelector('.die-cube');
       if(cube){
         // Compute the normalized target matching end of animation
@@ -1238,10 +1374,14 @@ function doRoll(){
       }
       settled[i].classList.remove('rolling','unrolled');
       settled[i].classList.add('roll-settle');
+      // Update kept class if handlePostRoll changed it
+      if(wasModifiedByPostRoll){
+        settled[i].classList.remove('kept');
+      }
     }
     _justRolled=keptSnapshot.map(k=>!k);
     // Render everything except dice
-    renderCharms();renderCategories();renderHUD();renderActions();renderConsumables();
+    renderActiveEffects();renderCharms();renderCategories();renderHUD();renderActions();renderConsumables();
   },700);
 }
 
