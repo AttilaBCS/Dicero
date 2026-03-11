@@ -316,7 +316,7 @@ function screenShake(){
 // ============================================================
 
 // Initialized after DOT_POS/DOT_FACES — see below
-let _cascadeDotTemplates=null;
+let _cascadeDotTemplates=null; // reset to null forces re-init on next cascade
 
 // Pre-cached dot templates using CSS var(--dot-sz) for size (optimization #9)
 function _initCascadeDotTemplates(){
@@ -327,7 +327,7 @@ function _initCascadeDotTemplates(){
     let html='';
     face.forEach(pos=>{
       const[x,y]=DOT_POS[pos];
-      html+=`<div style="position:absolute;left:${x}%;top:${y}%;width:var(--dot-sz);height:var(--dot-sz);background:radial-gradient(circle at 30% 30%,#fff,#e0d0ff 40%,#a080c0);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,0.5)"></div>`;
+      html+=`<div style="position:absolute;left:${x}%;top:${y}%;width:var(--dot-sz);height:var(--dot-sz);background:radial-gradient(circle at 35% 30%,#3a2010,#1a0c06,#120806);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,0.6),inset 0 1px 1px rgba(255,255,255,0.08)"></div>`;
     });
     _cascadeDotTemplates[v]=html;
   }
@@ -365,16 +365,19 @@ function triggerDiceCascade(){
     const vx=((Math.random()-0.5)*280).toFixed(1);
     const rx=(Math.random()>0.5?1:-1)*(360+Math.floor(Math.random()*3)*360);
     const ry=(Math.random()>0.5?1:-1)*(360+Math.floor(Math.random()*3)*360);
-    // Y accelerates (gravity), X decelerates (air resistance)
+    const rz=(Math.random()>0.5?1:-1)*(180+Math.floor(Math.random()*3)*180);
+    // Gentle side-to-side wobble as dice fall
+    const wobble=((Math.random()-0.5)*60).toFixed(1);
     kfText+=`@keyframes cMove${i}{`+
       `0%{transform:translateX(0px) translateY(0px)}`+
-      `20%{transform:translateX(${(vx*0.38).toFixed(1)}px) translateY(${(totalY*0.06).toFixed(0)}px)}`+
-      `50%{transform:translateX(${(vx*0.68).toFixed(1)}px) translateY(${(totalY*0.25).toFixed(0)}px)}`+
-      `80%{transform:translateX(${(vx*0.88).toFixed(1)}px) translateY(${(totalY*0.60).toFixed(0)}px)}`+
+      `15%{transform:translateX(${wobble}px) translateY(${(totalY*0.04).toFixed(0)}px)}`+
+      `35%{transform:translateX(${(-wobble*0.6).toFixed(1)}px) translateY(${(totalY*0.15).toFixed(0)}px)}`+
+      `55%{transform:translateX(${(parseFloat(vx)*0.5+parseFloat(wobble)*0.4).toFixed(1)}px) translateY(${(totalY*0.32).toFixed(0)}px)}`+
+      `80%{transform:translateX(${(parseFloat(vx)*0.88).toFixed(1)}px) translateY(${(totalY*0.62).toFixed(0)}px)}`+
       `100%{transform:translateX(${vx}px) translateY(${totalY}px)}`+
     `}`;
-    kfText+=`@keyframes cSpin${i}{0%{transform:rotateX(0deg) rotateY(0deg)}100%{transform:rotateX(${rx}deg) rotateY(${ry}deg)}}`;
-    dieData.push({rx,ry,vx});
+    kfText+=`@keyframes cSpin${i}{0%{transform:rotateX(0deg) rotateY(0deg) rotateZ(0deg)}100%{transform:rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)}}`;
+    dieData.push({rx,ry,rz,vx});
   }
   kfEl.textContent=kfText;
   document.head.appendChild(kfEl);
@@ -388,10 +391,13 @@ function triggerDiceCascade(){
     const size=55+Math.random()*30;
     const halfSize=(size/2).toFixed(1);
     const dotSz=Math.max(4,size*0.12).toFixed(1);
-    const startX=(8+Math.random()*84).toFixed(1);
-    const delay=i*150;
-    const fallDur=(2.5+Math.random()*1.2).toFixed(2);
-    const rotDur=(0.8+Math.random()*1.2).toFixed(2);
+    // Bucket-based spread: divide screen into zones, pick random position within each zone
+    const bucket=i%diceCount;
+    const zoneW=88/diceCount;
+    const startX=(4+bucket*zoneW+Math.random()*zoneW).toFixed(1);
+    const delay=Math.floor(Math.random()*350);
+    const fallDur=(2.0+Math.random()*0.5).toFixed(2);
+    const rotDur=(0.4+Math.random()*1.0).toFixed(2);
     const end=delay+parseFloat(fallDur)*1000;
     if(end>maxEnd)maxEnd=end;
 
@@ -488,45 +494,45 @@ const CATEGORIES = [
 ];
 
 const TRIALS = [
-  {name:'The Ember Sanctum',desc:'A crumbling temple lit by dying embers.',base:150,bossTarget:450,
+  {name:'The Penny Tables',desc:'Low stakes, easy money — if you know what you\'re doing.',base:150,bossTarget:450,
    enemies:[
-     {name:'Cinder Imp',effect:'none',desc:'No effect.'},
-     {name:'Ember Golem',effect:'none',desc:'No effect.'},
-     {name:'Flame Keeper',effect:'none',desc:'No effect.'},
+     {name:'The Rookie',effect:'none',desc:'No effect.'},
+     {name:'Weekend Regular',effect:'none',desc:'No effect.'},
+     {name:'The Shill',effect:'none',desc:'No effect.'},
    ],
-   boss:{name:'Pyraxxus, the Undying Flame',effect:'pyraxxus',desc:'Sixes are debuffed \u2014 those dice give 0 chips and skip Charm effects.'}
+   boss:{name:'Big Sal, Floor Enforcer',effect:'pyraxxus',desc:'Sixes are debuffed \u2014 those dice give 0 chips and skip Charm effects.'}
   },
-  {name:'The Hollow Depths',desc:'Fungal caverns and flooded crypts.',base:750,bossTarget:2250,
+  {name:'The High Roller Lounge',desc:'Velvet ropes, open bar, and eyes watching your every move.',base:750,bossTarget:2250,
    enemies:[
-     {name:'Spore Crawler',effect:'none',desc:'No effect.'},
-     {name:'Fungal Shaman',effect:'none',desc:'No effect.'},
-     {name:'Crystal Lurker',effect:'none',desc:'No effect.'},
+     {name:'Card Counter',effect:'none',desc:'No effect.'},
+     {name:'The Loan Shark',effect:'none',desc:'No effect.'},
+     {name:'Pit Boss',effect:'none',desc:'No effect.'},
    ],
-   boss:{name:'Gloomjaw, the Depth Devourer',effect:'gloomjaw',desc:'After each hand, your lowest-scoring used category is devoured (disabled).'}
+   boss:{name:'Vincent "The Rake" Morello',effect:'gloomjaw',desc:'After each hand, your lowest-scoring used category is raked off the table (disabled).'}
   },
-  {name:'The Shattered Spire',desc:'Wind and lightning rage through fractured halls.',base:3000,bossTarget:10000,
+  {name:'The Strip',desc:'Neon lights, desperate bets, and luck running razor thin.',base:3000,bossTarget:10000,
    enemies:[
-     {name:'Storm Elemental',effect:'none',desc:'No effect.'},
-     {name:'Skyborne Sentinel',effect:'none',desc:'No effect.'},
-     {name:'Shardcaster',effect:'none',desc:'No effect.'},
+     {name:'Whale Hunter',effect:'none',desc:'No effect.'},
+     {name:'The Comp King',effect:'none',desc:'No effect.'},
+     {name:'Snake Eyes',effect:'none',desc:'No effect.'},
    ],
-   boss:{name:'Voltaryx, the Spire\'s Crown',effect:'voltaryx',desc:'Can\'t score the same category twice in a row.'}
+   boss:{name:'Lady Electra, Casino Queen',effect:'voltaryx',desc:'She won\'t let you play the same angle twice — can\'t score the same category in a row.'}
   },
-  {name:'The Obsidian Rift',desc:'Dark glass and void energy twist the laws of chance.',base:15000,bossTarget:50000,
+  {name:'The Vault Room',desc:'Back-room games where the rules are made up and odds don\'t matter.',base:15000,bossTarget:50000,
    enemies:[
-     {name:'Void Flickerer',effect:'none',desc:'No effect.'},
-     {name:'Glass Stalker',effect:'none',desc:'No effect.'},
-     {name:'Null Prophet',effect:'none',desc:'No effect.'},
+     {name:'The Fixer',effect:'none',desc:'No effect.'},
+     {name:'Numbers Man',effect:'none',desc:'No effect.'},
+     {name:'Ghost Roller',effect:'none',desc:'No effect.'},
    ],
-   boss:{name:'Nihilex, the Rift Warden',effect:'nihilex',desc:'Two random numbers can\'t be scored (0 chips, don\'t count for combos).'}
+   boss:{name:'Zero Delacroix, the Void Banker',effect:'nihilex',desc:'Two random numbers are off the board — can\'t be scored (0 chips, don\'t count for combos).'}
   },
-  {name:'The Astral Throne',desc:'Beyond the mortal plane.',base:75000,bossTarget:250000,
+  {name:'The House',desc:'The final table. The owner watches from the shadows.',base:75000,bossTarget:250000,
    enemies:[
-     {name:'Stellar Wisp',effect:'none',desc:'No effect.'},
-     {name:'Constellation Beast',effect:'none',desc:'No effect.'},
-     {name:'Fate Spinner',effect:'none',desc:'No effect.'},
+     {name:'The Minder',effect:'none',desc:'No effect.'},
+     {name:'House Ace',effect:'none',desc:'No effect.'},
+     {name:'The Closer',effect:'none',desc:'No effect.'},
    ],
-   boss:{name:'Aeonax, the Final Arbiter',effect:'aeonax',desc:'Three numbers banned. -1 hand.'}
+   boss:{name:'Mr. Cavendish, The House',effect:'aeonax',desc:'Three numbers banned. -1 hand. The house sets the rules.'}
   },
 ];
 
@@ -669,15 +675,15 @@ const CHARMS = [
 ];
 
 const ENCHANTMENTS = [
-  {id:'rune_of_iron',name:'Rune of Iron',mod:'steel',desc:'Apply Steel: +4 mult when held (not scored).',cost:5},
-  {id:'goldweave',name:'Goldweave',mod:'gilded',desc:'Apply Gilded: +10 chips when scored.',cost:6},
-  {id:'shadow_ink',name:'Shadow Ink',mod:'void',desc:'Apply Void: \u00d71.5 mult but 0 chips.',cost:5},
-  {id:'chaos_rune',name:'Chaos Rune',mod:'wild',desc:'Apply Wild: counts as any value.',cost:7},
-  {id:'fates_favor',name:"Fate's Favor",mod:'lucky',desc:'Apply Lucky: 25% chance to trigger twice.',cost:5},
-  {id:'dark_bargain',name:'Dark Bargain',mod:'cursed',desc:'Apply Cursed: +8 mult, but shows 1 = -1 hand.',cost:4},
-  {id:'artisans_touch',name:"Artisan's Touch",mod:'remove',desc:'Remove a die modification.',cost:3},
-  {id:'weight_rune',name:'Weight Rune',mod:'weighted',desc:'Apply Weighted: always rolls 4-6.',cost:6},
-  {id:'mirror_shard',name:'Mirror Shard',mod:'mirrored',desc:'Apply Mirrored: value also adds as mult.',cost:6},
+  {id:'rune_of_iron',name:'Rune of Iron',mod:'steel',desc:'Apply Steel to a die slot — permanent for this run. That die always counts as 3.',cost:5},
+  {id:'goldweave',name:'Goldweave',mod:'gilded',desc:'Apply Gilded to a die slot — permanent for this run. That die earns +$1 every time it is scored.',cost:6},
+  {id:'shadow_ink',name:'Shadow Ink',mod:'void',desc:'Apply Void to a die slot — permanent for this run. That die gives \u00d71.5 mult but 0 chips.',cost:5},
+  {id:'chaos_rune',name:'Chaos Rune',mod:'wild',desc:'Apply Wild to a die slot — permanent for this run. That die counts as any value.',cost:7},
+  {id:'fates_favor',name:"Fate's Favor",mod:'lucky',desc:'Apply Lucky to a die slot — permanent for this run. That die has a 25% chance to score twice.',cost:5},
+  {id:'dark_bargain',name:'Dark Bargain',mod:'cursed',desc:'Apply Cursed to a die slot — permanent for this run. That die gives +8 mult, but rolling a 1 costs you a hand.',cost:4},
+  {id:'artisans_touch',name:"Artisan's Touch",mod:'remove',desc:'Remove the modification from a die slot.',cost:3},
+  {id:'weight_rune',name:'Weight Rune',mod:'weighted',desc:'Apply Weighted to a die slot — permanent for this run. That die always rolls 4, 5, or 6.',cost:6},
+  {id:'mirror_shard',name:'Mirror Shard',mod:'mirrored',desc:'Apply Mirrored to a die slot — permanent for this run. That die\'s face value is also added as mult each time it scores.',cost:6},
 ];
 
 const BLESSINGS = [
@@ -698,7 +704,7 @@ const BLESSINGS = [
 
 const SPECIALS = [
   {id:'extra_hand',name:'Extra Hand Scroll',desc:'+1 hand next encounter.',icon:'\u{1F4DC}',cost:3,effect:'extra_hand'},
-  {id:'extra_reroll',name:'Extra Reroll Scroll',desc:'+1 dice reroll next encounter (reroll unkept dice one extra time).',icon:'\u{1F3B2}',cost:3,effect:'extra_reroll'},
+  {id:'extra_reroll',name:'Extra Reroll Scroll',desc:'+1 dice reroll for your next encounter only. Lets you reroll unkept dice one extra time during combat. Does NOT reroll shop items — use the 🔄 button for that.',icon:'\u{1F3B2}',cost:3,effect:'extra_reroll'},
   {id:'dice_polish',name:'Dice Polish',desc:'One die starts at 6.',icon:'\u2728',cost:4,effect:'dice_polish'},
   {id:'charm_slot',name:'Charm Slot +1',desc:'Permanently +1 charm slot.',icon:'\u{1F48E}',cost:10,effect:'charm_slot'},
 ];
@@ -1262,7 +1268,7 @@ function renderHUD(){
   document.getElementById('hud-encounter').textContent=G.encounter+1;
   document.getElementById('score-fill').style.width=clamp(G.cumulativeScore/G.targetScore*100,0,100)+'%';
   const e=getEnemy();
-  document.getElementById('enemy-name').textContent=e.name||'';
+  document.getElementById('enemy-name').textContent=isBoss()?e.name||'':'';
   document.getElementById('enemy-effect').textContent='';
   document.getElementById('game').classList.toggle('boss-encounter',isBoss());
   if(!G.animating){['score-chips','score-mult','score-result'].forEach(id=>document.getElementById(id).textContent='');document.querySelector('.score-x').textContent='';document.querySelector('.score-eq').textContent=''}
@@ -1762,8 +1768,8 @@ function showTitleScreen(){
         </div>
       </div>
       <h1 class="title-logo">DICERO</h1>
-      <p class="title-tagline">A roguelike dice-builder</p>
-      <p class="title-flavor">Roll ancient dice. Build devastating combos.<br>Collect Charms of power. Conquer five Trials.</p>
+      <p class="title-tagline">The house always loses eventually.</p>
+      <p class="title-flavor">Push your luck at the table. Build monster combos.<br>Stack Charms. Beat the house across five high-stakes rounds.</p>
       <div class="title-buttons">
         <button class="btn btn-primary title-begin" onclick="showRulesScreen()">BEGIN RUN</button>
         <button class="btn title-comp" onclick="showInfoPage()">COMPENDIUM</button>
@@ -2071,7 +2077,7 @@ function renderShop(){
     const can=G.gold>=dc&&G.charms.length<G.maxCharmSlots&&!sold['c'+i];
     html+=`<div class="shop-card ${can?'':'disabled'} ${sold['c'+i]?'sold':''}" onclick="${can?`buyShopCharm(${i})`:''}"><div class="shop-icon">${c.icon||'?'}</div><span class="charm-rarity rarity-${c.rarity}">${c.rarity}</span><div class="shop-name">${c.name}</div><div class="shop-cost">$${dc}${dc<c.cost?' <s style="opacity:0.4">$'+c.cost+'</s>':''}</div><div class="shop-desc">${c.desc}</div></div>`;
   });
-  html+=`<div class="shop-card" onclick="rerollShop()" style="display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="shop-icon">\u{1F504}</div><div class="shop-name">Reroll</div><div class="shop-cost">$${G.shopRerollCost}</div></div></div>`;
+  html+=`<div class="shop-card" onclick="rerollShop()" style="display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="shop-icon">\u{1F504}</div><div class="shop-name">Reroll</div><div class="shop-cost">$${G.shopRerollCost}</div><div class="shop-desc">Shuffle all items currently on offer. Does not affect your dice in combat.</div></div></div>`;
 
   const canBl=G.gold>=bl.cost&&!sold.bl;
   const canEn=G.gold>=en.cost&&G.enchantments.length<G.maxEnchSlots&&!sold.en;
