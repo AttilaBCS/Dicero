@@ -1980,7 +1980,7 @@ function showTrialPreview(onContinue){
       <div style="font-size:11px;color:#a090c0;text-transform:uppercase;letter-spacing:3px;margin-bottom:8px">Trial ${G.trial+1} of 5</div>
       <h2 style="margin-bottom:4px;font-size:24px">${t.name}</h2>
       <p style="color:#6858a0;font-size:13px;font-style:italic;margin-bottom:12px">${t.desc}</p>
-      <p style="color:#8878b0;font-size:12px;margin-bottom:20px">3 encounters then a boss fight</p>
+      <p style="color:#8878b0;font-size:12px;margin-bottom:20px">After <strong style="color:#d0c0e8">3</strong> rounds of regular gameplay, you will face the boss.</p>
       <div style="background:rgba(40,15,15,0.5);border:1.5px solid rgba(200,60,60,0.3);border-radius:14px;padding:18px 22px;margin-bottom:16px;text-align:left">
         <div style="font-size:10px;color:#c08080;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px">Boss Awaits</div>
         <div style="font-size:18px;font-weight:700;color:#e8a0a0;margin-bottom:6px;text-shadow:0 0 16px rgba(200,60,60,0.3)">${boss.name}</div>
@@ -2037,10 +2037,18 @@ window.pickCharm=function(i){playSound('charm');const ch=window._pickChoices[i];
 
 function showTrialReward(){
   const rc=getRandomCharms('rare',1);const bl=shuffle(BLESSINGS).slice(0,1);const blCat=getCatDef(bl[0].category);
+  let charmCard='';
+  if(rc.length>0){
+    if(G.charms.length<G.maxCharmSlots){
+      charmCard='<div class="pick-card" onclick="pickTrialReward(\'charm\')"><div style="font-size:36px;margin-bottom:6px">'+(rc[0].icon||'?')+'</div><span class="charm-rarity rarity-rare">rare</span><div style="font-size:17px;font-weight:700;color:#d0c0e8;margin:10px 0">'+rc[0].name+'</div><div style="font-size:12px;color:#8878a8">'+rc[0].desc+'</div></div>';
+    } else {
+      charmCard='<div class="pick-card" style="opacity:0.4;cursor:not-allowed;pointer-events:none"><div style="font-size:36px;margin-bottom:6px">'+(rc[0].icon||'?')+'</div><span class="charm-rarity rarity-rare">rare</span><div style="font-size:17px;font-weight:700;color:#d0c0e8;margin:10px 0">'+rc[0].name+'</div><div style="font-size:12px;color:#c06060;margin-top:8px">No charm slots available</div></div>';
+    }
+  }
   let html=`<h2>Trial ${G.trial+1} Complete!</h2>
     <p class="text-center" style="color:#8878a8;margin-bottom:18px;font-style:italic">${TRIALS[G.trial].name} conquered!</p>
     <h3>Choose a Reward</h3><div class="pick-row">
-    ${rc.length>0?`<div class="pick-card" onclick="pickTrialReward('charm')"><div style="font-size:36px;margin-bottom:6px">${rc[0].icon||'?'}</div><span class="charm-rarity rarity-rare">rare</span><div style="font-size:17px;font-weight:700;color:#d0c0e8;margin:10px 0">${rc[0].name}</div><div style="font-size:12px;color:#8878a8">${rc[0].desc}</div></div>`:''}
+    ${charmCard}
     <div class="pick-card" onclick="pickTrialReward('blessing')"><div style="font-size:28px;margin-bottom:6px">\u{1F64F}</div><div style="font-size:17px;font-weight:700;color:#d0c0e8;margin:6px 0">${bl[0].name}</div><div style="font-size:12px;color:#8878a8">Level up ${blCat.name}</div></div>
     <div class="pick-card" onclick="pickTrialReward('gold')"><div style="font-size:28px;margin-bottom:6px">\u{1F4B0}</div><div style="font-size:17px;font-weight:700;color:#ffd700;margin:6px 0">+$15 Gold</div></div>
     </div>`;
