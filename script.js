@@ -704,7 +704,7 @@ const BLESSINGS = [
 
 const SPECIALS = [
   {id:'extra_hand',name:'Extra Hand Scroll',desc:'+1 hand next encounter.',icon:'\u{1F4DC}',cost:3,effect:'extra_hand'},
-  {id:'extra_reroll',name:'Extra Reroll Scroll',desc:'+1 dice reroll for your next encounter only. Lets you reroll unkept dice one extra time during combat. Does NOT reroll shop items — use the 🔄 button for that.',icon:'\u{1F3B2}',cost:3,effect:'extra_reroll'},
+  {id:'extra_reroll',name:'Extra Reroll Scroll',desc:'+1 dice reroll for your next encounter only. Lets you reroll unkept dice one extra time during combat. Does NOT affect shop items — use Charm Restock for that.',icon:'\u{1F3B2}',cost:3,effect:'extra_reroll'},
   {id:'dice_polish',name:'Dice Polish',desc:'One die starts at 6.',icon:'\u2728',cost:4,effect:'dice_polish'},
   {id:'charm_slot',name:'Charm Slot +1',desc:'Permanently +1 charm slot.',icon:'\u{1F48E}',cost:10,effect:'charm_slot'},
 ];
@@ -2085,7 +2085,7 @@ function renderShop(){
     const can=G.gold>=dc&&G.charms.length<G.maxCharmSlots&&!sold['c'+i];
     html+=`<div class="shop-card ${can?'':'disabled'} ${sold['c'+i]?'sold':''}" onclick="${can?`buyShopCharm(${i})`:''}"><div class="shop-icon">${c.icon||'?'}</div><span class="charm-rarity rarity-${c.rarity}">${c.rarity}</span><div class="shop-name">${c.name}</div><div class="shop-cost">$${dc}${dc<c.cost?' <s style="opacity:0.4">$'+c.cost+'</s>':''}</div><div class="shop-desc">${c.desc}</div></div>`;
   });
-  html+=`<div class="shop-card" onclick="rerollShop()" style="display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="shop-icon">\u{1F504}</div><div class="shop-name">Reroll</div><div class="shop-cost">$${G.shopRerollCost}</div><div class="shop-desc">Shuffle all items currently on offer. Does not affect your dice in combat.</div></div></div>`;
+  html+=`<div class="shop-card" onclick="rerollShop()" style="display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="shop-icon">\u{1F504}</div><div class="shop-name">Charm Restock</div><div class="shop-cost">$${G.shopRerollCost}</div><div class="shop-desc">Shuffle all items currently on offer. Does not affect your dice in combat.</div></div></div>`;
 
   const canBl=G.gold>=bl.cost&&!sold.bl;
   const canEn=G.gold>=en.cost&&G.enchantments.length<G.maxEnchSlots&&!sold.en;
